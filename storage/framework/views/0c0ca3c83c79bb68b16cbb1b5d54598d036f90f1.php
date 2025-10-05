@@ -1,0 +1,696 @@
+
+
+<?php $__env->startSection('title', $service->name . ' - SuperDaily'); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="container py-5">
+    <div class="row">
+        <!-- Service Details -->
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-body p-4">
+                    <!-- Service Images -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <img src="<?php echo e($service->image_url); ?>" alt="<?php echo e($service->name); ?>" 
+                                 class="img-fluid rounded service-main-image">
+                        </div>
+                        <div class="col-md-6">
+                            <?php if($service->image_2_url): ?>
+                                <img src="<?php echo e($service->image_2_url); ?>" alt="<?php echo e($service->name); ?>" 
+                                     class="img-fluid rounded mb-2 service-thumb-image">
+                            <?php endif; ?>
+                            <?php if($service->image_3_url): ?>
+                                <img src="<?php echo e($service->image_3_url); ?>" alt="<?php echo e($service->name); ?>" 
+                                     class="img-fluid rounded service-thumb-image">
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Service Information -->
+                    <div class="service-info">
+                        <h1 class="service-title mb-3"><?php echo e($service->name); ?></h1>
+                        
+                        <div class="service-meta mb-4">
+                            <span class="badge bg-primary me-2"><?php echo e($service->main_category_name ?? $service->category); ?></span>
+                            <span class="badge bg-info me-2"><?php echo e(ucfirst(str_replace('_', ' ', $service->subcategory ?? $service->category))); ?></span>
+                            <span class="badge bg-success me-2"><?php echo e($service->duration); ?></span>
+                            <?php if($service->is_featured): ?>
+                                <span class="badge bg-warning">Featured</span>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Booking Requirements Alert -->
+                        <?php if($service->booking_advance_hours): ?>
+                        <div class="alert alert-info mb-4">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock me-3 text-info"></i>
+                                <div>
+                                    <h6 class="mb-1">Booking Notice Required</h6>
+                                    <p class="mb-0">
+                                        Please book this service at least <strong><?php echo e($service->booking_advance_hours); ?> hours</strong> in advance.
+                                        <?php if($service->booking_requirements): ?>
+                                            <br><small class="text-muted"><?php echo e($service->booking_requirements); ?></small>
+                                        <?php endif; ?>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Subscription Plans (for Monthly Subscription services) -->
+                        <?php if($service->isMonthlySubscription() && $service->subscription_plans_array): ?>
+                        <div class="subscription-plans mb-4">
+                            <h5>Subscription Plans</h5>
+                            <div class="row">
+                                <?php $__currentLoopData = $service->subscription_plans_array; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan => $details): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if(isset($details['price']) && $details['price']): ?>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card border-primary">
+                                            <div class="card-body text-center">
+                                                <h6 class="card-title text-capitalize"><?php echo e($plan); ?> Plan</h6>
+                                                <h4 class="text-primary">₹<?php echo e(number_format($details['price'], 2)); ?></h4>
+                                                <?php if(isset($details['visits'])): ?>
+                                                    <small class="text-muted"><?php echo e($details['visits']); ?> visits per <?php echo e($plan); ?></small>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <div class="service-pricing mb-4">
+                            <?php if($service->discount_price): ?>
+                                <div class="d-flex align-items-center">
+                                    <h3 class="text-primary mb-0 me-3">₹<?php echo e(number_format($service->discount_price, 2)); ?></h3>
+                                    <span class="text-muted text-decoration-line-through">₹<?php echo e(number_format($service->price, 2)); ?></span>
+                                    <span class="badge bg-danger ms-2">
+                                        <?php echo e(round((($service->price - $service->discount_price) / $service->price) * 100)); ?>% OFF
+                                    </span>
+                                </div>
+                            <?php else: ?>
+                                <h3 class="text-primary mb-0">₹<?php echo e(number_format($service->price, 2)); ?></h3>
+                            <?php endif; ?>
+                            <small class="text-muted">per <?php echo e($service->unit); ?></small>
+                        </div>
+
+                        <div class="service-description mb-4">
+                            <h5>Description</h5>
+                            <p class="text-muted"><?php echo e($service->description); ?></p>
+                        </div>
+
+                        <?php if($service->features): ?>
+                        <div class="service-features mb-4">
+                            <h5>Features</h5>
+                            <ul class="list-unstyled">
+                                <?php $__currentLoopData = $service->features_array; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i><?php echo e(trim($feature)); ?>
+
+                                    </li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if($service->requirements_array): ?>
+                        <div class="service-requirements mb-4">
+                            <h5>Requirements</h5>
+                            <ul class="list-unstyled">
+                                <?php $__currentLoopData = $service->requirements_array; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $requirement): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li class="mb-2">
+                                        <i class="fas fa-info-circle text-info me-2"></i><?php echo e(trim($requirement)); ?>
+
+                                    </li>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                            </ul>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Form / Service Information Panel -->
+        <div class="col-lg-4">
+            <div class="card shadow-lg border-0 sticky-top" style="top: 20px;">
+                <?php if(auth()->guard()->check()): ?>
+                    <!-- Booking Form for Logged-in Users -->
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check me-2"></i>Book This Service
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <?php if(session('success')): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i><?php echo e(session('success')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if($errors->any()): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Booking Failed:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="<?php echo e(route('bookings.store')); ?>">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="service_id" value="<?php echo e($service->id); ?>">
+                            
+                            <!-- Service Summary -->
+                            <div class="booking-summary mb-4 p-3 bg-light rounded">
+                                <h6 class="mb-2">Service Summary</h6>
+                                <div class="d-flex justify-content-between">
+                                    <span><?php echo e($service->name); ?></span>
+                                    <strong>₹<?php echo e(number_format($service->discount_price ?? $service->price, 2)); ?></strong>
+                                </div>
+                                <small class="text-muted"><?php echo e($service->duration); ?> per <?php echo e($service->unit); ?></small>
+                            </div>
+
+                            <!-- Booking Details -->
+                            <div class="mb-3">
+                                <label for="booking_date" class="form-label">Preferred Date</label>
+                                <input type="date" class="form-control <?php $__errorArgs = ['booking_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       id="booking_date" name="booking_date" 
+                                       value="<?php echo e(old('booking_date')); ?>" 
+                                       min="<?php echo e(date('Y-m-d')); ?>" required>
+                                <?php $__errorArgs = ['booking_date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="booking_time" class="form-label">Preferred Time</label>
+                                <select class="form-control <?php $__errorArgs = ['booking_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                        id="booking_time" name="booking_time" required>
+                                    <option value="">Select Time</option>
+                                    <option value="09:00" <?php echo e(old('booking_time') == '09:00' ? 'selected' : ''); ?>>9:00 AM</option>
+                                    <option value="10:00" <?php echo e(old('booking_time') == '10:00' ? 'selected' : ''); ?>>10:00 AM</option>
+                                    <option value="11:00" <?php echo e(old('booking_time') == '11:00' ? 'selected' : ''); ?>>11:00 AM</option>
+                                    <option value="12:00" <?php echo e(old('booking_time') == '12:00' ? 'selected' : ''); ?>>12:00 PM</option>
+                                    <option value="14:00" <?php echo e(old('booking_time') == '14:00' ? 'selected' : ''); ?>>2:00 PM</option>
+                                    <option value="15:00" <?php echo e(old('booking_time') == '15:00' ? 'selected' : ''); ?>>3:00 PM</option>
+                                    <option value="16:00" <?php echo e(old('booking_time') == '16:00' ? 'selected' : ''); ?>>4:00 PM</option>
+                                    <option value="17:00" <?php echo e(old('booking_time') == '17:00' ? 'selected' : ''); ?>>5:00 PM</option>
+                                </select>
+                                <?php $__errorArgs = ['booking_time'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Service Address</label>
+                                <textarea class="form-control <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                          id="address" name="address" rows="3" 
+                                          placeholder="Enter your complete address" required><?php echo e(old('address', auth()->user()->address ?? '')); ?></textarea>
+                                <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Contact Number</label>
+                                <input type="tel" class="form-control <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                       id="phone" name="phone" 
+                                       value="<?php echo e(old('phone', auth()->user()->phone ?? '')); ?>" 
+                                       placeholder="Enter your phone number" required>
+                                <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="special_instructions" class="form-label">Special Instructions</label>
+                                <textarea class="form-control <?php $__errorArgs = ['special_instructions'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                          id="special_instructions" name="special_instructions" rows="3" 
+                                          placeholder="Any special requirements or instructions"><?php echo e(old('special_instructions')); ?></textarea>
+                                <?php $__errorArgs = ['special_instructions'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="bookNowBtn">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Now
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <!-- Login Required for Non-logged-in Users -->
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lock me-2"></i>Login Required
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="text-center">
+                            <div class="mb-4">
+                                <i class="fas fa-lock fa-3x text-muted mb-3"></i>
+                                <h6>Login Required to Book</h6>
+                                <p class="text-muted">Please login to book this service</p>
+                            </div>
+                            
+                            <!-- Service Summary -->
+                            <div class="service-info-card mb-4 p-3 bg-light rounded">
+                                <h6 class="mb-3">Service Details</h6>
+                                <div class="service-detail-item mb-2">
+                                    <strong>Service:</strong> <?php echo e($service->name); ?>
+
+                                </div>
+                                <div class="service-detail-item mb-2">
+                                    <strong>Category:</strong> <?php echo e($service->category); ?>
+
+                                </div>
+                                <div class="service-detail-item mb-2">
+                                    <strong>Duration:</strong> <?php echo e($service->duration); ?>
+
+                                </div>
+                                <div class="service-detail-item mb-2">
+                                    <strong>Unit:</strong> <?php echo e($service->unit); ?>
+
+                                </div>
+                                <div class="service-detail-item mb-2">
+                                    <strong>Price:</strong> 
+                                    <span class="text-primary fw-bold">
+                                        ₹<?php echo e(number_format($service->discount_price ?? $service->price, 2)); ?>
+
+                                        <?php if($service->discount_price): ?>
+                                            <small class="text-success">(<?php echo e(round((($service->price - $service->discount_price) / $service->price) * 100)); ?>% OFF)</small>
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                                <?php if($service->is_featured): ?>
+                                <div class="service-detail-item mb-2">
+                                    <span class="badge bg-warning">
+                                        <i class="fas fa-star me-1"></i>Featured Service
+                                    </span>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="<?php echo e(route('login')); ?>" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                                </a>
+                                <a href="<?php echo e(route('register')); ?>" class="btn btn-outline-primary">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Services -->
+    <?php if(isset($relatedServices) && $relatedServices->count() > 0): ?>
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="mb-4">Related Services</h3>
+            <div class="row">
+                <?php $__currentLoopData = $relatedServices->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $relatedService): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="<?php echo e($relatedService->image_url); ?>" 
+                             class="card-img-top" 
+                             alt="<?php echo e($relatedService->name); ?>"
+                             style="height: 200px; object-fit: cover;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title"><?php echo e($relatedService->name); ?></h5>
+                            <p class="card-text text-muted"><?php echo e(Str::limit($relatedService->description, 100)); ?></p>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-primary fw-bold">
+                                        ₹<?php echo e(number_format($relatedService->discount_price ?? $relatedService->price, 2)); ?>
+
+                                    </span>
+                                    <span class="badge bg-secondary"><?php echo e($relatedService->category); ?></span>
+                                </div>
+                                <a href="<?php echo e(route('services.show', $relatedService)); ?>" 
+                                   class="btn btn-outline-primary w-100">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+</div>
+
+<style>
+.service-main-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.service-thumb-image {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.service-title {
+    color: #333;
+    font-weight: 700;
+}
+
+.service-pricing h3 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.booking-summary {
+    border-left: 4px solid #007bff;
+}
+
+.service-info-card {
+    border-left: 4px solid #28a745;
+}
+
+.card {
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.badge {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.service-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>
+
+<!-- Booking Success Modal -->
+<div class="modal fade" id="bookingSuccessModal" tabindex="-1" aria-labelledby="bookingSuccessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="bookingSuccessModalLabel">
+                    <i class="fas fa-check-circle me-2"></i>Booking Successful!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-calendar-check fa-4x text-success mb-3"></i>
+                    <h4 class="text-success">Congratulations!</h4>
+                    <p class="lead">Your service has been booked successfully.</p>
+                </div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>What's Next?</strong><br>
+                    We will contact you soon to confirm the details and schedule your service.
+                </div>
+                <div class="mt-3">
+                    <p class="text-muted">
+                        <strong>Booking Reference:</strong> <span id="bookingReference"></span><br>
+                        <strong>Service:</strong> <?php echo e($service->name); ?><br>
+                        <strong>Amount:</strong> ₹<?php echo e(number_format($service->discount_price ?? $service->price, 2)); ?>
+
+                    </p>
+                </div>
+            </div>
+                   <div class="modal-footer">
+                       <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                   </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookingForm = document.querySelector('form[action="<?php echo e(route('bookings.store')); ?>"]');
+    const bookNowBtn = document.getElementById('bookNowBtn');
+    const bookingSuccessModal = new bootstrap.Modal(document.getElementById('bookingSuccessModal'));
+    
+    if (bookingForm && bookNowBtn) {
+        console.log('Booking form found, adding event listener');
+        bookingForm.addEventListener('submit', function(e) {
+            console.log('Form submit event triggered');
+            e.preventDefault();
+            
+            // Clear previous error messages
+            clearFormErrors();
+            
+            // Validate form before submission
+            if (!validateForm()) {
+                console.log('Form validation failed');
+                return;
+            }
+            console.log('Form validation passed');
+            
+            // Disable the button and show loading state
+            bookNowBtn.disabled = true;
+            bookNowBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            
+            // Get form data
+            const formData = new FormData(bookingForm);
+            
+            // Add CSRF token
+            formData.append('_token', document.querySelector('input[name="_token"]').value);
+            
+                   // Submit form via AJAX
+                   console.log('Submitting booking form...');
+                   fetch(bookingForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    // Show success modal
+                    document.getElementById('bookingReference').textContent = data.booking_reference || 'N/A';
+                    bookingSuccessModal.show();
+                    
+                    // Reset form
+                    bookingForm.reset();
+                } else {
+                    // Show error messages
+                    console.log('Booking failed with errors:', data.errors);
+                    showFormErrors(data.errors || {});
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while processing your booking. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable button
+                bookNowBtn.disabled = false;
+                bookNowBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Book Now';
+            });
+        });
+    }
+    
+    function validateForm() {
+        let isValid = true;
+        const errors = {};
+        
+        // Required fields validation
+        const requiredFields = {
+            'booking_date': 'Please select a booking date',
+            'booking_time': 'Please select a booking time',
+            'address': 'Please enter your service address',
+            'phone': 'Please enter your contact number'
+        };
+        
+        Object.keys(requiredFields).forEach(field => {
+            const input = document.querySelector(`[name="${field}"]`);
+            if (input && !input.value.trim()) {
+                errors[field] = [requiredFields[field]];
+                isValid = false;
+            }
+        });
+        
+        // Date validation
+        const bookingDate = document.querySelector('[name="booking_date"]');
+        if (bookingDate && bookingDate.value) {
+            const selectedDate = new Date(bookingDate.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate < today) {
+                errors['booking_date'] = ['Please select a date from today onwards'];
+                isValid = false;
+            }
+        }
+        
+        // Phone validation
+        const phone = document.querySelector('[name="phone"]');
+        if (phone && phone.value) {
+            const phoneRegex = /^[6-9]\d{9}$/;
+            if (!phoneRegex.test(phone.value.replace(/\D/g, ''))) {
+                errors['phone'] = ['Please enter a valid 10-digit phone number'];
+                isValid = false;
+            }
+        }
+        
+        // Address length validation
+        const address = document.querySelector('[name="address"]');
+        if (address && address.value && address.value.length > 500) {
+            errors['address'] = ['Address should not exceed 500 characters'];
+            isValid = false;
+        }
+        
+        // Special instructions length validation
+        const specialInstructions = document.querySelector('[name="special_instructions"]');
+        if (specialInstructions && specialInstructions.value && specialInstructions.value.length > 1000) {
+            errors['special_instructions'] = ['Special instructions should not exceed 1000 characters'];
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            showFormErrors(errors);
+        }
+        
+        return isValid;
+    }
+    
+    function clearFormErrors() {
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        document.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+    }
+    
+    function showFormErrors(errors) {
+        // Clear previous error messages
+        clearFormErrors();
+        
+        // Show new error messages
+        Object.keys(errors).forEach(field => {
+            const input = document.querySelector(`[name="${field}"]`);
+            if (input) {
+                input.classList.add('is-invalid');
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = errors[field][0];
+                
+                input.parentNode.appendChild(errorDiv);
+            }
+        });
+    }
+});
+</script>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\xampp\htdocs\superdaily\resources\views/services/details.blade.php ENDPATH**/ ?>
