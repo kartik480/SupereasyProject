@@ -55,7 +55,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Booking Time</label>
-                            <p class="mb-0">{{ \Carbon\Carbon::createFromFormat('H:i', $booking->booking_time)->format('g:i A') }}</p>
+                            <p class="mb-0">{{ \Carbon\Carbon::createFromFormat('H:i:s', $booking->booking_time)->format('g:i A') }}</p>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Total Amount</label>

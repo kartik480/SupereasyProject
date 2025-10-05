@@ -40,7 +40,7 @@
                                         </div>
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="fas fa-clock text-muted me-2"></i>
-                                            <small>{{ $booking->booking_time ? \Carbon\Carbon::createFromFormat('H:i', $booking->booking_time)->format('g:i A') : 'N/A' }}</small>
+                                            <small>{{ $booking->booking_time ? \Carbon\Carbon::createFromFormat('H:i:s', $booking->booking_time)->format('g:i A') : 'N/A' }}</small>
                                         </div>
                                         <div class="d-flex align-items-center mb-2">
                                             <i class="fas fa-map-marker-alt text-muted me-2"></i>
