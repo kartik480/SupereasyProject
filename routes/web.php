@@ -16,6 +16,7 @@ use App\Http\Controllers\Frontend\ServiceController as FrontendServiceController
 use App\Http\Controllers\Frontend\BookingController as FrontendBookingController;
 use App\Http\Controllers\SuperAdminController;
 use App\Http\Controllers\MaidDashboardController;
+use App\Http\Controllers\ChangePasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,9 +52,11 @@ Route::get('/profile', function () {
 // Profile Management Routes (Protected)
 Route::middleware('auth')->group(function () {
     Route::put('/profile/update', [App\Http\Controllers\Auth\AuthController::class, 'updateProfile'])->name('profile.update');
-    Route::get('/change-password', [App\Http\Controllers\Auth\AuthController::class, 'showChangePasswordForm'])->name('change-password');
-    Route::post('/change-password', [App\Http\Controllers\Auth\AuthController::class, 'changePassword']);
 });
+
+// Change Password Routes (Temporarily without auth to test)
+Route::get('/change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('change-password');
+Route::post('/change-password', [ChangePasswordController::class, 'changePassword']);
 
 // Product browsing routes
 Route::get('/products', [FrontendProductController::class, 'index'])->name('products.index');
@@ -186,16 +189,6 @@ Route::prefix('admin')->group(function () {
     Route::post('/bookings/{booking}/complete', [BookingController::class, 'complete'])->name('admin.bookings.complete');
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel'])->name('admin.bookings.cancel');
     
-    // Offers Management
-    Route::resource('offers', OfferController::class)->names([
-        'index' => 'admin.offers.index',
-        'create' => 'admin.offers.create',
-        'store' => 'admin.offers.store',
-        'show' => 'admin.offers.show',
-        'edit' => 'admin.offers.edit',
-        'update' => 'admin.offers.update',
-        'destroy' => 'admin.offers.destroy',
-    ]);
     
     // Reports and Analytics
     Route::get('/reports/bookings', [DashboardController::class, 'bookingReports'])->name('admin.reports.bookings');

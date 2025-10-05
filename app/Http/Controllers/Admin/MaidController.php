@@ -69,22 +69,6 @@ class MaidController extends Controller
             'address' => 'nullable|string|max:500',
             'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female,other',
-            'marital_status' => 'nullable|in:single,married,divorced,widowed',
-            'husband_name' => 'nullable|string|max:255',
-            'father_name' => 'nullable|string|max:255',
-            'aadhar_number' => 'nullable|string|size:12|regex:/^[0-9]{12}$/',
-            'aadhar_card' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'pan_number' => 'nullable|string|size:10|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
-            'pan_card' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'address_proof_type' => 'nullable|string|max:255',
-            'address_proof_document' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
-            'google_maps_link' => 'nullable|url|max:500',
-            'police_verification' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'medical_certificate' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'reference_contact' => 'nullable|string|max:255',
-            'reference_phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
@@ -105,7 +89,7 @@ class MaidController extends Controller
             $data = $request->all();
 
             // Handle file uploads
-            $fileFields = ['profile_image', 'aadhar_card', 'pan_card', 'address_proof_document', 'police_verification', 'medical_certificate'];
+            $fileFields = ['profile_image'];
             
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
@@ -179,22 +163,6 @@ class MaidController extends Controller
             'address' => 'nullable|string|max:500',
             'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female,other',
-            'marital_status' => 'nullable|in:single,married,divorced,widowed',
-            'husband_name' => 'nullable|string|max:255',
-            'father_name' => 'nullable|string|max:255',
-            'aadhar_number' => 'nullable|string|size:12|regex:/^[0-9]{12}$/',
-            'aadhar_card' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'pan_number' => 'nullable|string|size:10|regex:/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/',
-            'pan_card' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'address_proof_type' => 'nullable|string|max:255',
-            'address_proof_document' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'latitude' => 'nullable|numeric|between:-90,90',
-            'longitude' => 'nullable|numeric|between:-180,180',
-            'google_maps_link' => 'nullable|url|max:500',
-            'police_verification' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'medical_certificate' => 'nullable|file|max:5120|mimes:jpeg,jpg,png,pdf',
-            'reference_contact' => 'nullable|string|max:255',
-            'reference_phone' => 'nullable|string|max:20',
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
@@ -215,7 +183,7 @@ class MaidController extends Controller
             $data = $request->all();
 
             // Handle file uploads
-            $fileFields = ['profile_image', 'aadhar_card', 'pan_card', 'address_proof_document', 'police_verification', 'medical_certificate'];
+            $fileFields = ['profile_image'];
             
             foreach ($fileFields as $field) {
                 if ($request->hasFile($field)) {
