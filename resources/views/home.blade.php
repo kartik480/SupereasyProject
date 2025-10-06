@@ -156,11 +156,12 @@
                             <small class="text-muted">Quick access to your dashboard</small>
                         </div>
                         <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                            @if(auth()->user()->role === 'superadmin')
-                                <a href="{{ route('superadmin.dashboard') }}" class="btn btn-danger btn-sm me-2">
-                                    <i class="fas fa-crown me-1"></i>Super Admin
-                                </a>
-                            @endif
+                            <!-- SuperAdmin Button - Always visible but protected by middleware -->
+                            <a href="{{ route('superadmin.dashboard') }}" class="btn btn-danger btn-sm me-2">
+                                <i class="fas fa-crown me-1"></i>Super Admin
+                            </a>
+                            
+                            <!-- Admin Panel Button -->
                             @if(in_array(auth()->user()->role, ['superadmin', 'admin']))
                                 <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-sm me-2">
                                     <i class="fas fa-tachometer-alt me-1"></i>Admin Panel

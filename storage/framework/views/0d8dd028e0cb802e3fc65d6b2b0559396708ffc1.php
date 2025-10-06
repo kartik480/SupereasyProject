@@ -156,13 +156,18 @@
                             <small class="text-muted">Quick access to your dashboard</small>
                         </div>
                         <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                            <?php if(auth()->user()->role === 'superadmin'): ?>
-                                <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="btn btn-danger btn-sm me-2">
-                                    <i class="fas fa-crown me-1"></i>Super Admin
-                                </a>
-                            <?php endif; ?>
+                            <!-- SuperAdmin Button - Always visible but protected by middleware -->
+                            <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="btn btn-danger btn-sm me-2">
+                                <i class="fas fa-crown me-1"></i>Super Admin
+                            </a>
+                            
+                            <!-- Admin Panel Button -->
                             <?php if(in_array(auth()->user()->role, ['superadmin', 'admin'])): ?>
                                 <a href="<?php echo e(route('admin.dashboard')); ?>" class="btn btn-primary btn-sm me-2">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Admin Panel
+                                </a>
+                            <?php else: ?>
+                                <a href="<?php echo e(route('admin.login.show')); ?>" class="btn btn-primary btn-sm me-2">
                                     <i class="fas fa-tachometer-alt me-1"></i>Admin Panel
                                 </a>
                             <?php endif; ?>
@@ -581,7 +586,11 @@
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            // Skip empty hash links
+            if (href === '#') return;
+            
+            const target = document.querySelector(href);
             if (target) {
                 target.scrollIntoView({
                     behavior: 'smooth',

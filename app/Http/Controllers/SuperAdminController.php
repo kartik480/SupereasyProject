@@ -26,46 +26,63 @@ class SuperAdminController extends Controller
 
     public function dashboard()
     {
-        // Statistics
+        // Basic Statistics
         $totalUsers = User::count();
         $totalBookings = Booking::count();
         $totalServices = Service::where('is_active', true)->count();
-        $totalRevenue = Booking::where('status', 'completed')->sum('total_amount');
+        $totalProducts = Product::where('is_active', true)->count();
+        
+        // User breakdown
+        $totalCustomers = User::where('role', 'user')->count();
+        $totalMaids = User::where('role', 'maid')->count();
+        $totalAdmins = User::whereIn('role', ['admin', 'superadmin'])->count();
+        
+        // Booking statistics
+        $pendingBookings = Booking::where('status', 'pending')->count();
+        
+        // Revenue statistics
+        $totalRevenue = Booking::where('status', 'completed')->sum('total_amount') ?? 0;
+        $monthlyRevenue = Booking::where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('total_amount') ?? 0;
+        $dailyRevenue = Booking::where('status', 'completed')
+            ->whereDate('created_at', now()->toDateString())
+            ->sum('total_amount') ?? 0;
 
-        // Recent activities (simplified)
-        $recentActivities = collect([
-            (object)[
-                'icon' => 'fas fa-user-plus text-success',
-                'title' => 'New user registered',
-                'description' => 'A new customer joined the platform',
-                'created_at' => now()->subHours(1)
-            ],
-            (object)[
-                'icon' => 'fas fa-shopping-cart text-info',
-                'title' => 'New booking created',
-                'description' => 'Customer booked a service',
-                'created_at' => now()->subHours(2)
-            ],
-            (object)[
-                'icon' => 'fas fa-check text-success',
-                'title' => 'Booking completed',
-                'description' => 'Service successfully delivered',
-                'created_at' => now()->subHours(3)
-            ],
-            (object)[
-                'icon' => 'fas fa-user-tie text-primary',
-                'title' => 'Maid registered',
-                'description' => 'New maid joined the platform',
-                'created_at' => now()->subHours(4)
-            ],
-        ]);
+        // Recent data
+        $recentBookings = Booking::with(['user', 'service'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+            
+        $recentUsers = User::orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Prepare data arrays
+        $stats = [
+            'total_users' => $totalUsers,
+            'total_bookings' => $totalBookings,
+            'total_services' => $totalServices,
+            'total_products' => $totalProducts,
+            'total_customers' => $totalCustomers,
+            'total_maids' => $totalMaids,
+            'total_admins' => $totalAdmins,
+            'pending_bookings' => $pendingBookings,
+        ];
+
+        $revenueStats = [
+            'total_revenue' => $totalRevenue,
+            'monthly_revenue' => $monthlyRevenue,
+            'daily_revenue' => $dailyRevenue,
+        ];
 
         return view('superadmin.dashboard', compact(
-            'totalUsers',
-            'totalBookings',
-            'totalServices',
-            'totalRevenue',
-            'recentActivities'
+            'stats',
+            'revenueStats',
+            'recentBookings',
+            'recentUsers'
         ));
     }
 }

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo $__env->yieldContent('title', 'SuperDaily - Grocery & Services Delivery'); ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -194,25 +195,46 @@
             color: var(--primary-color);
         }
         
-        .admin-panel-btn {
+        .admin-panel-buttons {
             position: fixed;
             bottom: 30px;
             right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .admin-panel-btn {
             background: var(--secondary-color);
             color: white;
             border: none;
             border-radius: 50px;
-            padding: 15px 25px;
+            padding: 12px 20px;
             font-weight: bold;
+            font-size: 14px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-            z-index: 1000;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
         }
         
         .admin-panel-btn:hover {
             background: #e55a2b;
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .superadmin-btn {
+            background: #dc3545;
+        }
+        
+        .superadmin-btn:hover {
+            background: #c82333;
         }
         
         /* Professional Services Section */
@@ -1189,10 +1211,21 @@
                                         <i class="fas fa-key me-2"></i>Change Password
                                     </a>
                                 </li>
-                                <?php if(Auth::user()->role === 'admin' || Auth::user()->role === 'superadmin'): ?>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
+                                    <a class="dropdown-item" href="<?php echo e(route('superadmin.dashboard')); ?>">
+                                        <i class="fas fa-crown me-2"></i>Super Admin
+                                    </a>
+                                </li>
+                                <?php if(Auth::user()->role === 'admin' || Auth::user()->role === 'superadmin'): ?>
+                                <li>
                                     <a class="dropdown-item" href="<?php echo e(route('admin.dashboard')); ?>">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
+                                    </a>
+                                </li>
+                                <?php else: ?>
+                                <li>
+                                    <a class="dropdown-item" href="<?php echo e(route('admin.login.show')); ?>">
                                         <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
                                     </a>
                                 </li>
@@ -1285,10 +1318,15 @@
         </div>
     </footer>
 
-    <!-- Admin Panel Button -->
-    <a href="<?php echo e(route('admin.dashboard')); ?>" class="admin-panel-btn">
-        <i class="fas fa-cog me-2"></i>Admin Panel
-    </a>
+    <!-- Admin Panel Buttons -->
+    <div class="admin-panel-buttons">
+        <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="admin-panel-btn superadmin-btn">
+            <i class="fas fa-crown me-2"></i>Super Admin
+        </a>
+        <a href="<?php echo e(route('admin.login.show')); ?>" class="admin-panel-btn">
+            <i class="fas fa-cog me-2"></i>Admin Panel
+        </a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <?php echo $__env->yieldContent('scripts'); ?>
