@@ -1,335 +1,326 @@
-@extends('layouts.app')
+@extends('layouts.superadmin')
 
 @section('title', 'SuperAdmin Dashboard - SuperDaily')
 
+@section('page-icon')
+<i class="fas fa-tachometer-alt"></i>
+@endsection
+@section('page-title', 'Dashboard')
+@section('page-subtitle', 'Welcome to your SuperAdmin dashboard')
+
+@section('header-actions')
+<a href="{{ route('superadmin.maids.create') }}" class="action-btn">
+    <i class="fas fa-user-plus"></i>Add Maid
+</a>
+<a href="{{ route('superadmin.services.create') }}" class="action-btn btn-outline">
+    <i class="fas fa-plus"></i>Add Service
+</a>
+@endsection
+
 @section('content')
-<div class="container-fluid py-4">
-    <!-- Dashboard Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-1">
-                        <i class="fas fa-crown text-danger me-2"></i>SuperAdmin Dashboard
-                    </h1>
-                    <p class="text-muted mb-0">Complete system control and management</p>
-                </div>
-                <div>
-                    <a href="{{ route('superadmin.users.create') }}" class="btn btn-primary">
-                        <i class="fas fa-user-plus me-2"></i>Create User
-                    </a>
-                </div>
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon primary">
+                <i class="fas fa-users"></i>
             </div>
+        </div>
+        <div class="stat-card-value">{{ $stats['total_customers'] }}</div>
+        <div class="stat-card-label">Total Customers</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+15% from last month
         </div>
     </div>
 
-    <!-- System Statistics -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['total_users'] }}</h4>
-                            <p class="mb-0">Total Users</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-users fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon success">
+                <i class="fas fa-user-tie"></i>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['total_bookings'] }}</h4>
-                            <p class="mb-0">Total Bookings</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-check fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['total_services'] }}</h4>
-                            <p class="mb-0">Total Services</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-concierge-bell fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h4 class="mb-0">{{ $stats['total_products'] }}</h4>
-                            <p class="mb-0">Total Products</p>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-box fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card-value">{{ $stats['total_maids'] }}</div>
+        <div class="stat-card-label">Total Maids</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+8% from last month
         </div>
     </div>
 
-    <!-- Detailed Statistics -->
-    <div class="row mb-4">
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">User Breakdown</h5>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="text-primary">
-                                <h4>{{ $stats['total_customers'] }}</h4>
-                                <small>Customers</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-info">
-                                <h4>{{ $stats['total_maids'] }}</h4>
-                                <small>Maids</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-6">
-                            <div class="text-success">
-                                <h4>{{ $stats['total_admins'] }}</h4>
-                                <small>Admins</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-danger">
-                                <h4>1</h4>
-                                <small>SuperAdmins</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon warning">
+                <i class="fas fa-calendar-check"></i>
             </div>
         </div>
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Booking Status</h5>
-                    <div class="row">
-                        <div class="col-6">
-                            <div class="text-warning">
-                                <h4>{{ $stats['pending_bookings'] }}</h4>
-                                <small>Pending</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-success">
-                                <h4>{{ $stats['total_bookings'] - $stats['pending_bookings'] }}</h4>
-                                <small>Processed</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-4 col-md-6 mb-3">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Revenue</h5>
-                    <div class="text-success">
-                        <h4>₹{{ number_format($revenueStats['total_revenue'], 2) }}</h4>
-                        <small>Total Revenue</small>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-6">
-                            <div class="text-info">
-                                <h5>₹{{ number_format($revenueStats['monthly_revenue'], 2) }}</h5>
-                                <small>This Month</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-primary">
-                                <h5>₹{{ number_format($revenueStats['daily_revenue'], 2) }}</h5>
-                                <small>Today</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card-value">{{ $stats['total_bookings'] }}</div>
+        <div class="stat-card-label">Total Bookings</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+22% from last month
         </div>
     </div>
 
-    <div class="row">
-        <!-- Recent Bookings -->
-        <div class="col-lg-8 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-history me-2"></i>Recent Bookings
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($recentBookings->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Customer</th>
-                                        <th>Service</th>
-                                        <th>Date & Time</th>
-                                        <th>Status</th>
-                                        <th>Amount</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($recentBookings as $booking)
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                @if($booking->user && $booking->user->profile_image)
-                                                    <img src="{{ $booking->user->profile_image_url }}" 
-                                                         alt="{{ $booking->user->name }}" 
-                                                         class="rounded-circle me-2" 
-                                                         style="width: 32px; height: 32px; object-fit: cover;">
-                                                @endif
-                                                <div>
-                                                    <div class="fw-bold">{{ $booking->user->name ?? 'N/A' }}</div>
-                                                    <small class="text-muted">{{ $booking->user->email ?? 'N/A' }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold">{{ $booking->service->name ?? 'N/A' }}</div>
-                                            <small class="text-muted">{{ $booking->booking_reference }}</small>
-                                        </td>
-                                        <td>
-                                            <div>{{ \Carbon\Carbon::parse($booking->booking_date)->format('M d, Y') }}</div>
-                                            <small class="text-muted">{{ $booking->booking_time }}</small>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $statusColors = [
-                                                    'pending' => 'warning',
-                                                    'confirmed' => 'success',
-                                                    'in_progress' => 'info',
-                                                    'completed' => 'secondary',
-                                                    'cancelled' => 'danger'
-                                                ];
-                                                $statusColor = $statusColors[$booking->status] ?? 'secondary';
-                                            @endphp
-                                            <span class="badge bg-{{ $statusColor }}">{{ ucfirst($booking->status) }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold">₹{{ number_format($booking->final_amount, 2) }}</span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('admin.bookings.show', $booking) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                            <h5>No Bookings Yet</h5>
-                            <p class="text-muted">No bookings have been made yet.</p>
-                        </div>
-                    @endif
-                </div>
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon info">
+                <i class="fas fa-concierge-bell"></i>
             </div>
         </div>
+        <div class="stat-card-value">{{ $stats['active_services'] }}</div>
+        <div class="stat-card-label">Active Services</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+12% from last month
+        </div>
+    </div>
+</div>
 
-        <!-- Quick Actions & Recent Users -->
-        <div class="col-lg-4">
-            <!-- Quick Actions -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-bolt me-2"></i>Quick Actions
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('superadmin.users.create') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-2"></i>Create User
-                        </a>
-                        <a href="{{ route('superadmin.users') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-users me-2"></i>Manage Users
-                        </a>
-                        <a href="{{ route('admin.services.index') }}" class="btn btn-outline-success">
-                            <i class="fas fa-concierge-bell me-2"></i>Manage Services
-                        </a>
-                        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-info">
-                            <i class="fas fa-box me-2"></i>Manage Products
-                        </a>
-                        <a href="{{ route('superadmin.settings') }}" class="btn btn-outline-warning">
-                            <i class="fas fa-cog me-2"></i>System Settings
-                        </a>
-                    </div>
-                </div>
+<!-- Quick Actions -->
+<div class="content-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-bolt"></i>Quick Actions
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3 col-sm-6">
+                <a href="{{ route('superadmin.maids.create') }}" class="action-btn w-100 text-center">
+                    <i class="fas fa-user-plus"></i>Add Maid
+                </a>
             </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{{ route('superadmin.services.create') }}" class="action-btn w-100 text-center">
+                    <i class="fas fa-concierge-bell"></i>Add Service
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{{ route('superadmin.products.create') }}" class="action-btn w-100 text-center">
+                    <i class="fas fa-shopping-cart"></i>Add Product
+                </a>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <a href="{{ route('superadmin.bookings.index') }}" class="action-btn w-100 text-center">
+                    <i class="fas fa-calendar-check"></i>Manage Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Recent Users -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-user-clock me-2"></i>Recent Users
-                    </h5>
-                </div>
-                <div class="card-body">
-                    @if($recentUsers->count() > 0)
-                        @foreach($recentUsers->take(5) as $user)
-                        <div class="d-flex align-items-center mb-3">
-                            @if($user->profile_image)
-                                <img src="{{ $user->profile_image_url }}" 
-                                     alt="{{ $user->name }}" 
-                                     class="rounded-circle me-3" 
-                                     style="width: 40px; height: 40px; object-fit: cover;">
-                            @else
-                                <div class="rounded-circle bg-secondary me-3 d-flex align-items-center justify-content-center" 
-                                     style="width: 40px; height: 40px;">
-                                    <i class="fas fa-user text-white"></i>
+<!-- Recent Bookings -->
+<div class="content-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-calendar-alt"></i>Recent Bookings
+        </h5>
+        <a href="{{ route('superadmin.bookings.index') }}" class="action-btn btn-outline">
+            <i class="fas fa-eye"></i>View All
+        </a>
+    </div>
+    <div class="card-body p-0">
+        @if($recentBookings->count() > 0)
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentBookings as $booking)
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ $booking->customer_name ?? ($booking->user->name ?? 'N/A') }}</div>
+                                <small class="text-muted">{{ $booking->customer_phone ?? ($booking->user->phone ?? 'N/A') }}</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ $booking->service->name ?? 'N/A' }}</div>
+                                <small class="text-muted">{{ $booking->service->category ?? '' }}</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold">{{ $booking->booking_date ? $booking->booking_date->format('M d, Y') : 'N/A' }}</div>
+                                <small class="text-muted">{{ $booking->booking_time ?? 'N/A' }}</small>
+                            </td>
+                            <td>
+                                @if($booking->status === 'pending')
+                                    <span class="status-badge inactive">Pending</span>
+                                @elseif($booking->status === 'confirmed')
+                                    <span class="status-badge active">Confirmed</span>
+                                @elseif($booking->status === 'completed')
+                                    <span class="status-badge featured">Completed</span>
+                                @else
+                                    <span class="status-badge inactive">{{ ucfirst($booking->status) }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="fw-bold">₹{{ number_format($booking->final_amount ?? $booking->amount ?? 0, 2) }}</div>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('superadmin.bookings.show', $booking) }}" 
+                                       class="btn-action btn-view" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('superadmin.bookings.edit', $booking) }}" 
+                                       class="btn-action btn-edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </div>
-                            @endif
-                            <div class="flex-grow-1">
-                                <div class="fw-bold">{{ $user->name }}</div>
-                                <small class="text-muted">{{ ucfirst($user->role) }}</small>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <i class="fas fa-calendar-alt"></i>
+                <h5>No Recent Bookings</h5>
+                <p>Bookings will appear here once customers start making reservations.</p>
+            </div>
+        @endif
+    </div>
+</div>
+
+<!-- Recent Customers -->
+<div class="content-card">
+    <div class="card-header">
+        <h5 class="card-title">
+            <i class="fas fa-user-friends"></i>Recent Customers
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        @if($recentCustomers->count() > 0)
+            <div class="table-container">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentCustomers as $customer)
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ $customer->name }}</div>
+                            </td>
+                            <td>
+                                <div>{{ $customer->email }}</div>
+                            </td>
+                            <td>
+                                <div>{{ $customer->phone ?? 'N/A' }}</div>
+                            </td>
+                            <td>
+                                <div>{{ $customer->created_at->format('M d, Y') }}</div>
+                            </td>
+                            <td>
+                                @if($customer->is_active)
+                                    <span class="status-badge active">Active</span>
+                                @else
+                                    <span class="status-badge inactive">Inactive</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <i class="fas fa-user-friends"></i>
+                <h5>No Recent Customers</h5>
+                <p>Customer registrations will appear here.</p>
+            </div>
+        @endif
+    </div>
+</div>
+
+<!-- System Overview -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-pie"></i>System Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-danger fs-4">{{ $stats['total_services'] }}</div>
+                            <small class="text-muted">Total Services</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-danger fs-4">{{ $stats['total_products'] }}</div>
+                            <small class="text-muted">Total Products</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-danger fs-4">{{ $stats['pending_bookings'] }}</div>
+                            <small class="text-muted">Pending Bookings</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-danger fs-4">{{ $stats['total_categories'] }}</div>
+                            <small class="text-muted">Categories</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="content-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="fas fa-clock"></i>Recent Activity
+                </h5>
+            </div>
+            <div class="card-body">
+                @if(count($recentActivities) > 0)
+                    <div class="activity-list">
+                        @foreach($recentActivities as $activity)
+                        <div class="activity-item d-flex align-items-center mb-3">
+                            <div class="activity-icon me-3">
+                                @if(isset($activity['type']) && $activity['type'] === 'new_user')
+                                    <i class="fas fa-user-plus text-success"></i>
+                                @elseif(isset($activity['type']) && $activity['type'] === 'new_booking')
+                                    <i class="fas fa-calendar-plus text-danger"></i>
+                                @elseif(isset($activity['type']) && $activity['type'] === 'product_update')
+                                    <i class="fas fa-box text-warning"></i>
+                                @elseif(isset($activity['type']) && $activity['type'] === 'service_completed')
+                                    <i class="fas fa-check-circle text-success"></i>
+                                @else
+                                    <i class="fas fa-circle text-danger"></i>
+                                @endif
                             </div>
-                            <div class="text-end">
-                                <small class="text-muted">{{ $user->created_at->diffForHumans() }}</small>
+                            <div class="activity-content">
+                                <div class="fw-bold">{{ $activity['description'] ?? 'Activity' }}</div>
+                                <small class="text-muted">{{ $activity['time'] ?? 'Recently' }}</small>
                             </div>
                         </div>
                         @endforeach
-                        <div class="text-center">
-                            <a href="{{ route('superadmin.users') }}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-list me-1"></i>View All Users
-                            </a>
-                        </div>
-                    @else
-                        <div class="text-center py-3">
-                            <i class="fas fa-user-slash fa-2x text-muted mb-2"></i>
-                            <p class="text-muted mb-0">No users yet</p>
-                        </div>
-                    @endif
-                </div>
+                    </div>
+                @else
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-history fa-2x mb-3"></i>
+                        <p>No recent activity</p>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
