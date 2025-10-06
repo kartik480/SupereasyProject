@@ -208,7 +208,7 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
     Route::get('/dashboard', [App\Http\Controllers\SuperAdmin\DashboardController::class, 'index'])->name('superadmin.dashboard');
     
     // Categories Management
-    Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)->names([
+    Route::resource('categories', App\Http\Controllers\SuperAdmin\CategoryController::class)->names([
         'index' => 'superadmin.categories.index',
         'create' => 'superadmin.categories.create',
         'store' => 'superadmin.categories.store',
@@ -219,7 +219,7 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
     ]);
     
     // Products Management
-    Route::resource('products', App\Http\Controllers\Admin\ProductController::class)->names([
+    Route::resource('products', App\Http\Controllers\SuperAdmin\ProductController::class)->names([
         'index' => 'superadmin.products.index',
         'create' => 'superadmin.products.create',
         'store' => 'superadmin.products.store',
@@ -230,12 +230,12 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
     ]);
     
     // Bulk Upload for Products
-    Route::get('/products/bulk-upload', [App\Http\Controllers\Admin\BulkUploadController::class, 'show'])->name('superadmin.products.bulk-upload');
-    Route::post('/products/bulk-upload', [App\Http\Controllers\Admin\BulkUploadController::class, 'upload'])->name('superadmin.products.bulk-upload.store');
-    Route::get('/products/download-template', [App\Http\Controllers\Admin\BulkUploadController::class, 'downloadTemplate'])->name('superadmin.products.download-template');
+    Route::get('/products/bulk-upload', [App\Http\Controllers\SuperAdmin\BulkUploadController::class, 'show'])->name('superadmin.products.bulk-upload');
+    Route::post('/products/bulk-upload', [App\Http\Controllers\SuperAdmin\BulkUploadController::class, 'upload'])->name('superadmin.products.bulk-upload.store');
+    Route::get('/products/download-template', [App\Http\Controllers\SuperAdmin\BulkUploadController::class, 'downloadTemplate'])->name('superadmin.products.download-template');
     
     // Services Management
-    Route::resource('services', App\Http\Controllers\Admin\ServiceController::class)->names([
+    Route::resource('services', App\Http\Controllers\SuperAdmin\ServiceController::class)->names([
         'index' => 'superadmin.services.index',
         'create' => 'superadmin.services.create',
         'store' => 'superadmin.services.store',
@@ -246,16 +246,20 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
     ]);
     
     // Bookings Management
-    Route::resource('bookings', App\Http\Controllers\Admin\BookingController::class)->names([
+    Route::resource('bookings', App\Http\Controllers\SuperAdmin\BookingController::class)->names([
         'index' => 'superadmin.bookings.index',
+        'create' => 'superadmin.bookings.create',
+        'store' => 'superadmin.bookings.store',
         'show' => 'superadmin.bookings.show',
+        'edit' => 'superadmin.bookings.edit',
+        'update' => 'superadmin.bookings.update',
         'destroy' => 'superadmin.bookings.destroy',
     ]);
-    Route::patch('/bookings/{booking}/update-status', [App\Http\Controllers\Admin\BookingController::class, 'updateStatus'])->name('superadmin.bookings.update-status');
-    Route::post('/bookings/{booking}/assign-maid', [App\Http\Controllers\Admin\BookingController::class, 'assignMaid'])->name('superadmin.bookings.assign-maid');
+    Route::patch('/bookings/{booking}/update-status', [App\Http\Controllers\SuperAdmin\BookingController::class, 'updateStatus'])->name('superadmin.bookings.update-status');
+    Route::post('/bookings/{booking}/assign-maid', [App\Http\Controllers\SuperAdmin\BookingController::class, 'assignMaid'])->name('superadmin.bookings.assign-maid');
     
     // Offers Management
-    Route::resource('offers', App\Http\Controllers\Admin\OfferController::class)->names([
+    Route::resource('offers', App\Http\Controllers\SuperAdmin\OfferController::class)->names([
         'index' => 'superadmin.offers.index',
         'create' => 'superadmin.offers.create',
         'store' => 'superadmin.offers.store',
@@ -264,10 +268,10 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
         'update' => 'superadmin.offers.update',
         'destroy' => 'superadmin.offers.destroy',
     ]);
-    Route::patch('/offers/{offer}/toggle-status', [App\Http\Controllers\Admin\OfferController::class, 'toggleStatus'])->name('superadmin.offers.toggle-status');
+    Route::patch('/offers/{offer}/toggle-status', [App\Http\Controllers\SuperAdmin\OfferController::class, 'toggleStatus'])->name('superadmin.offers.toggle-status');
     
     // Maids Management
-    Route::resource('maids', App\Http\Controllers\Admin\MaidController::class)->names([
+    Route::resource('maids', App\Http\Controllers\SuperAdmin\MaidController::class)->names([
         'index' => 'superadmin.maids.index',
         'create' => 'superadmin.maids.create',
         'store' => 'superadmin.maids.store',
@@ -276,14 +280,14 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
         'update' => 'superadmin.maids.update',
         'destroy' => 'superadmin.maids.destroy',
     ]);
-    Route::patch('/maids/{maid}/toggle-availability', [App\Http\Controllers\Admin\MaidController::class, 'toggleAvailability'])->name('superadmin.maids.toggle-availability');
-    Route::post('/maids/{maid}/assign-booking', [App\Http\Controllers\Admin\MaidController::class, 'assignBooking'])->name('superadmin.maids.assign-booking');
+    Route::patch('/maids/{maid}/toggle-availability', [App\Http\Controllers\SuperAdmin\MaidController::class, 'toggleAvailability'])->name('superadmin.maids.toggle-availability');
+    Route::post('/maids/{maid}/assign-booking', [App\Http\Controllers\SuperAdmin\MaidController::class, 'assignBooking'])->name('superadmin.maids.assign-booking');
     
     // Booking Status Management
-    Route::post('/bookings/{booking}/confirm', [App\Http\Controllers\Admin\BookingController::class, 'confirm'])->name('superadmin.bookings.confirm');
-    Route::post('/bookings/{booking}/start', [App\Http\Controllers\Admin\BookingController::class, 'start'])->name('superadmin.bookings.start');
-    Route::post('/bookings/{booking}/complete', [App\Http\Controllers\Admin\BookingController::class, 'complete'])->name('superadmin.bookings.complete');
-    Route::post('/bookings/{booking}/cancel', [App\Http\Controllers\Admin\BookingController::class, 'cancel'])->name('superadmin.bookings.cancel');
+    Route::post('/bookings/{booking}/confirm', [App\Http\Controllers\SuperAdmin\BookingController::class, 'confirm'])->name('superadmin.bookings.confirm');
+    Route::post('/bookings/{booking}/start', [App\Http\Controllers\SuperAdmin\BookingController::class, 'start'])->name('superadmin.bookings.start');
+    Route::post('/bookings/{booking}/complete', [App\Http\Controllers\SuperAdmin\BookingController::class, 'complete'])->name('superadmin.bookings.complete');
+    Route::post('/bookings/{booking}/cancel', [App\Http\Controllers\SuperAdmin\BookingController::class, 'cancel'])->name('superadmin.bookings.cancel');
     
     // Reports
     Route::get('/reports/bookings', [App\Http\Controllers\SuperAdmin\DashboardController::class, 'bookingReports'])->name('superadmin.reports.bookings');
@@ -293,7 +297,7 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
 
 // SuperAdmin Dashboard (Outside admin group)
 Route::middleware('auth')->group(function () {
-    Route::get('/superadmin', [SuperAdminController::class, 'dashboard'])->name('superadmin.dashboard');
+    Route::get('/superadmin', [SuperAdminController::class, 'dashboard'])->name('superadmin.legacy');
     
     // Maid Dashboard
     Route::prefix('maid')->name('maid.')->group(function () {

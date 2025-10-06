@@ -290,6 +290,38 @@
             color: white;
         }
 
+        /* Dropdown Styling */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 10px 0;
+            margin-top: 10px;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
+        .dropdown-item.text-danger:hover {
+            background: rgba(220, 53, 69, 0.15);
+            color: #c82333;
+        }
+
+        .dropdown-divider {
+            margin: 8px 0;
+            border-color: #e9ecef;
+        }
+
         /* Tables */
         .table-container {
             overflow-x: auto;
@@ -549,8 +581,17 @@
                             Reports
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('superadmin.logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </li>
                 </ul>
             </nav>
+            <form id="logout-form" action="{{ route('superadmin.logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
         </div>
 
         <!-- Main Content -->
@@ -568,13 +609,6 @@
                 </div>
                 <div class="header-actions">
                     @yield('header-actions')
-                    <a href="{{ route('superadmin.logout') }}" class="action-btn btn-outline" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
-                    </a>
-                    <form id="logout-form" action="{{ route('superadmin.logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
                 </div>
             </div>
 

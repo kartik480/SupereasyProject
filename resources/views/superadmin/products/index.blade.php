@@ -1,27 +1,83 @@
 @extends('layouts.superadmin')
 
-@section('title', 'Products - SuperAdmin')
+@section('title', 'Products Management - SuperAdmin')
 
 @section('page-icon')
 <i class="fas fa-shopping-cart"></i>
 @endsection
-@section('page-title', 'Products')
-@section('page-subtitle', 'Manage your product inventory')
+@section('page-title', 'Products Management')
+@section('page-subtitle', 'Manage your product inventory and catalog')
 
 @section('header-actions')
-<a href="{{ route('superadmin.products.create') }}" class="action-btn">
-    <i class="fas fa-plus"></i>Add Product
-</a>
 <a href="{{ route('superadmin.products.bulk-upload') }}" class="action-btn btn-outline">
     <i class="fas fa-upload"></i>Bulk Upload
+</a>
+<a href="{{ route('superadmin.products.create') }}" class="action-btn">
+    <i class="fas fa-plus"></i>Add Product
 </a>
 @endsection
 
 @section('content')
+<!-- Statistics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon danger">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ $products->total() }}</div>
+        <div class="stat-card-label">Total Products</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+12% from last month
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ $products->where('is_active', true)->count() }}</div>
+        <div class="stat-card-label">Active Products</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+8% from last month
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon warning">
+                <i class="fas fa-star"></i>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ $products->where('is_featured', true)->count() }}</div>
+        <div class="stat-card-label">Featured Products</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>+5% from last month
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <div class="stat-card-icon info">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ $products->where('stock_quantity', '<', 10)->count() }}</div>
+        <div class="stat-card-label">Low Stock</div>
+        <div class="stat-card-change negative">
+            <i class="fas fa-arrow-down me-1"></i>Needs attention
+        </div>
+    </div>
+</div>
+
+<!-- Products Table -->
 <div class="content-card">
     <div class="card-header">
         <h5 class="card-title">
-            <i class="fas fa-shopping-cart"></i>All Products
+            <i class="fas fa-list"></i>All Products
         </h5>
     </div>
     <div class="card-body p-0">
@@ -31,7 +87,7 @@
                     <thead>
                         <tr>
                             <th>Image</th>
-                            <th>Name</th>
+                            <th>Product Details</th>
                             <th>Category</th>
                             <th>Price</th>
                             <th>Stock</th>
@@ -46,42 +102,49 @@
                                 @if($product->image)
                                     <img src="{{ asset('storage/' . $product->image) }}" 
                                          alt="{{ $product->name }}" 
-                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                         class="product-image">
                                 @else
                                     <div class="bg-light rounded d-flex align-items-center justify-content-center" 
                                          style="width: 50px; height: 50px;">
-                                        <i class="fas fa-image text-muted"></i>
+                                        <i class="fas fa-box text-muted"></i>
                                     </div>
                                 @endif
                             </td>
                             <td>
                                 <div class="fw-bold">{{ $product->name }}</div>
                                 <small class="text-muted">{{ Str::limit($product->description, 50) }}</small>
+                                @if($product->sku)
+                                    <br><small class="text-info">SKU: {{ $product->sku }}</small>
+                                @endif
                             </td>
                             <td>
-                                @if($product->category)
-                                    <span class="badge bg-info">{{ $product->category->name }}</span>
-                                @else
-                                    <span class="text-muted">No category</span>
-                                @endif
+                                <span class="badge bg-secondary">{{ $product->category->name ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 <div class="fw-bold">₹{{ number_format($product->price, 2) }}</div>
+                                @if($product->discount_price)
+                                    <small class="text-success">₹{{ number_format($product->discount_price, 2) }}</small>
+                                @endif
                             </td>
                             <td>
-                                <span class="badge {{ $product->stock_quantity < 10 ? 'bg-danger' : 'bg-success' }}">
-                                    {{ $product->stock_quantity }}
-                                </span>
+                                <div class="fw-bold {{ $product->stock_quantity < 10 ? 'text-danger' : '' }}">
+                                    {{ $product->stock_quantity }} {{ $product->unit }}
+                                </div>
+                                @if($product->stock_quantity < 10)
+                                    <small class="text-danger">Low Stock!</small>
+                                @endif
                             </td>
                             <td>
-                                @if($product->is_active)
-                                    <span class="status-badge active">Active</span>
-                                @else
-                                    <span class="status-badge inactive">Inactive</span>
-                                @endif
-                                @if($product->is_featured)
-                                    <span class="status-badge featured">Featured</span>
-                                @endif
+                                <div class="d-flex flex-column gap-1">
+                                    @if($product->is_featured)
+                                        <span class="status-badge featured">Featured</span>
+                                    @endif
+                                    @if($product->is_active)
+                                        <span class="status-badge active">Active</span>
+                                    @else
+                                        <span class="status-badge inactive">Inactive</span>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
@@ -94,7 +157,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('superadmin.products.destroy', $product) }}" 
-                                          method="POST" style="display: inline;" 
+                                          method="POST" class="d-inline"
                                           onsubmit="return confirm('Are you sure you want to delete this product?')">
                                         @csrf
                                         @method('DELETE')
@@ -109,14 +172,24 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            <div class="d-flex justify-content-center p-4">
+                {{ $products->links() }}
+            </div>
         @else
             <div class="empty-state">
                 <i class="fas fa-shopping-cart"></i>
                 <h5>No Products Found</h5>
-                <p>Add your first product to start selling.</p>
-                <a href="{{ route('superadmin.products.create') }}" class="action-btn">
-                    <i class="fas fa-plus"></i>Add Product
-                </a>
+                <p>Start by adding your first product to the inventory.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <a href="{{ route('superadmin.products.create') }}" class="action-btn">
+                        <i class="fas fa-plus"></i>Add Your First Product
+                    </a>
+                    <a href="{{ route('superadmin.products.bulk-upload') }}" class="action-btn btn-outline">
+                        <i class="fas fa-upload"></i>Bulk Upload
+                    </a>
+                </div>
             </div>
         @endif
     </div>
