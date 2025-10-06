@@ -192,4 +192,117 @@ class AuthController extends Controller
 
         return back()->withErrors(['profile_image' => 'No image selected.']);
     }
+
+    /**
+     * Show admin login form
+     */
+    public function showAdminLoginForm()
+    {
+        // If user is already authenticated and has admin role, redirect to dashboard
+        if (Auth::check() && in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+        
+        return view('auth.admin-login');
+    }
+
+    /**
+     * Handle admin login
+     */
+    public function adminLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
+            
+            // Check if user has admin privileges
+            if (!in_array($user->role, ['admin', 'superadmin'])) {
+                Auth::logout();
+                return back()->withErrors(['email' => 'You do not have permission to access the admin panel.']);
+            }
+
+            // Check if user is active
+            if (!$user->is_active) {
+                Auth::logout();
+                return back()->withErrors(['email' => 'Your account has been deactivated. Please contact support.']);
+            }
+
+            $request->session()->regenerate();
+            
+            return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, ' . $user->name . '!');
+        }
+
+        return back()->withErrors(['email' => 'Invalid credentials. Please check your email and password.']);
+    }
+
+    /**
+     * Handle admin logout
+     */
+    public function adminLogout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('admin.login.show')->with('success', 'You have been logged out successfully.');
+    }
+
+    /**
+     * Show admin registration form
+     */
+    public function showAdminRegisterForm()
+    {
+        // If user is already authenticated and has admin role, redirect to dashboard
+        if (Auth::check() && in_array(Auth::user()->role, ['admin', 'superadmin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+        
+        return view('auth.admin-register');
+    }
+
+    /**
+     * Handle admin registration
+     */
+    public function adminRegister(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'role' => 'required|in:admin,superadmin',
+            'password' => 'required|string|min:8|confirmed',
+            'terms' => 'required|accepted',
+        ], [
+            'terms.accepted' => 'You must agree to the Terms of Service and Privacy Policy.',
+            'role.in' => 'Please select a valid admin role.',
+        ]);
+
+        try {
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'role' => $request->role,
+                'password' => bcrypt($request->password),
+                'is_active' => true, // Admin accounts are active by default
+            ]);
+
+            // Automatically log in the new admin user
+            Auth::login($user);
+
+            return redirect()->route('admin.dashboard')->with('success', 'Admin account created successfully! Welcome to the admin panel, ' . $user->name . '!');
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Failed to create admin account. Please try again.'])->withInput();
+        }
+    }
 }

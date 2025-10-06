@@ -40,6 +40,13 @@ Route::get('/register', [App\Http\Controllers\Auth\AuthController::class, 'showR
 Route::post('/register', [App\Http\Controllers\Auth\AuthController::class, 'register']);
 Route::post('/logout', [App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
 
+// Admin Authentication Routes
+Route::get('/admin/login', [App\Http\Controllers\Auth\AuthController::class, 'showAdminLoginForm'])->name('admin.login.show');
+Route::post('/admin/login', [App\Http\Controllers\Auth\AuthController::class, 'adminLogin'])->name('admin.login');
+Route::get('/admin/register', [App\Http\Controllers\Auth\AuthController::class, 'showAdminRegisterForm'])->name('admin.register.show');
+Route::post('/admin/register', [App\Http\Controllers\Auth\AuthController::class, 'adminRegister'])->name('admin.register');
+Route::post('/admin/logout', [App\Http\Controllers\Auth\AuthController::class, 'adminLogout'])->name('admin.logout');
+
 // Redirect old /profile to new /my-profile (outside auth middleware)
 Route::get('/profile', function () {
     if (Auth::check()) {
@@ -75,8 +82,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel'])->name('bookings.cancel');
 });
 
-// Admin Routes
-Route::prefix('admin')->group(function () {
+// Admin Routes (Protected by admin middleware)
+Route::prefix('admin')->middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     

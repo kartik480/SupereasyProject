@@ -1196,6 +1196,13 @@
                                         <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
                                     </a>
                                 </li>
+                                @else
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.login.show') }}">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Admin Panel
+                                    </a>
+                                </li>
                                 @endif
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -1286,7 +1293,7 @@
     </footer>
 
     <!-- Admin Panel Button -->
-    <a href="{{ route('admin.dashboard') }}" class="admin-panel-btn">
+    <a href="{{ route('admin.login.show') }}" class="admin-panel-btn">
         <i class="fas fa-cog me-2"></i>Admin Panel
     </a>
 

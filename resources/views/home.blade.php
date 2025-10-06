@@ -165,6 +165,10 @@
                                 <a href="{{ route('admin.dashboard') }}" class="btn btn-primary btn-sm me-2">
                                     <i class="fas fa-tachometer-alt me-1"></i>Admin Panel
                                 </a>
+                            @else
+                                <a href="{{ route('admin.login.show') }}" class="btn btn-primary btn-sm me-2">
+                                    <i class="fas fa-tachometer-alt me-1"></i>Admin Panel
+                                </a>
                             @endif
                             @if(auth()->user()->role === 'maid')
                                 <a href="{{ route('maid.dashboard') }}" class="btn btn-info btn-sm">
