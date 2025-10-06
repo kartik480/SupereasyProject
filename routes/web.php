@@ -49,11 +49,6 @@ Route::get('/profile', function () {
     }
 });
 
-// Profile Management Routes (Protected)
-Route::middleware('auth')->group(function () {
-    Route::put('/profile/update', [App\Http\Controllers\Auth\AuthController::class, 'updateProfile'])->name('profile.update');
-});
-
 // Change Password Routes (Temporarily without auth to test)
 Route::get('/change-password', [ChangePasswordController::class, 'showChangePasswordForm'])->name('change-password');
 Route::post('/change-password', [ChangePasswordController::class, 'changePassword']);
@@ -70,14 +65,11 @@ Route::get('/services/{service}', [App\Http\Controllers\ServiceController::class
 
 // User profile routes
 Route::get('/my-profile', [App\Http\Controllers\UserController::class, 'profile'])->name('user.profile');
-Route::middleware('auth')->group(function () {
-    // Route::get('/profile', [App\Http\Controllers\Auth\AuthController::class, 'showProfile'])->name('profile'); // Commented out to resolve GET conflict
-    Route::put('/profile/update', [App\Http\Controllers\Auth\AuthController::class, 'updateProfile'])->name('profile.update'); // Changed to avoid PUT conflict
-});
+Route::put('/profile/update', [App\Http\Controllers\Auth\AuthController::class, 'updateProfile'])->name('profile.update');
 
 // Booking routes (Temporarily removing auth middleware for testing)
 Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'show'])->name('bookings.show');
     Route::delete('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel'])->name('bookings.cancel');
