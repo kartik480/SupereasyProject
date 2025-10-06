@@ -157,7 +157,7 @@
                         </div>
                         <div class="col-md-6 text-md-end mt-2 mt-md-0">
                             <!-- SuperAdmin Button - Always visible but protected by middleware -->
-                            <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="btn btn-danger btn-sm me-2">
+                            <a href="<?php echo e(route('superadmin.login.show')); ?>" class="btn btn-danger btn-sm me-2">
                                 <i class="fas fa-crown me-1"></i>Super Admin
                             </a>
                             

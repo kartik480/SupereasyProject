@@ -1213,7 +1213,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="<?php echo e(route('superadmin.dashboard')); ?>">
+                                    <a class="dropdown-item" href="<?php echo e(route('superadmin.login.show')); ?>">
                                         <i class="fas fa-crown me-2"></i>Super Admin
                                     </a>
                                 </li>
@@ -1320,7 +1320,7 @@
 
     <!-- Admin Panel Buttons -->
     <div class="admin-panel-buttons">
-        <a href="<?php echo e(route('superadmin.dashboard')); ?>" class="admin-panel-btn superadmin-btn">
+        <a href="<?php echo e(route('superadmin.login.show')); ?>" class="admin-panel-btn superadmin-btn">
             <i class="fas fa-crown me-2"></i>Super Admin
         </a>
         <a href="<?php echo e(route('admin.login.show')); ?>" class="admin-panel-btn">

@@ -305,4 +305,112 @@ class AuthController extends Controller
             return back()->withErrors(['email' => 'Failed to create admin account. Please try again.'])->withInput();
         }
     }
+
+    /**
+     * Show SuperAdmin login form
+     */
+    public function showSuperAdminLoginForm()
+    {
+        // If user is already authenticated and has superadmin role, redirect to dashboard
+        if (Auth::check() && Auth::user()->role === 'superadmin') {
+            return redirect()->route('superadmin.dashboard');
+        }
+        
+        return view('auth.superadmin-login');
+    }
+
+    /**
+     * Handle SuperAdmin login
+     */
+    public function superAdminLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:6',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+        $remember = $request->has('remember');
+
+        if (Auth::attempt($credentials, $remember)) {
+            $user = Auth::user();
+            
+            // Check if user has superadmin privileges
+            if ($user->role !== 'superadmin') {
+                Auth::logout();
+                return back()->withErrors(['email' => 'You do not have permission to access the SuperAdmin panel.']);
+            }
+
+            // Check if user is active
+            if (!$user->is_active) {
+                Auth::logout();
+                return back()->withErrors(['email' => 'Your account has been deactivated. Please contact support.']);
+            }
+
+            $request->session()->regenerate();
+            
+            return redirect()->intended(route('superadmin.dashboard'))->with('success', 'Welcome back, ' . $user->name . '!');
+        }
+
+        return back()->withErrors(['email' => 'Invalid credentials. Please check your email and password.']);
+    }
+
+    /**
+     * Handle SuperAdmin logout
+     */
+    public function superAdminLogout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return redirect()->route('superadmin.login.show')->with('success', 'You have been logged out successfully.');
+    }
+
+    /**
+     * Show SuperAdmin registration form
+     */
+    public function showSuperAdminRegisterForm()
+    {
+        // If user is already authenticated and has superadmin role, redirect to dashboard
+        if (Auth::check() && Auth::user()->role === 'superadmin') {
+            return redirect()->route('superadmin.dashboard');
+        }
+        
+        return view('auth.superadmin-register');
+    }
+
+    /**
+     * Handle SuperAdmin registration
+     */
+    public function superAdminRegister(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'password' => 'required|string|min:8|confirmed',
+            'terms' => 'required|accepted',
+        ], [
+            'terms.accepted' => 'You must agree to the Terms of Service and Privacy Policy.',
+        ]);
+
+        try {
+            $user = \App\Models\User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'role' => 'superadmin', // Fixed role for SuperAdmin registration
+                'password' => bcrypt($request->password),
+                'is_active' => true, // SuperAdmin accounts are active by default
+            ]);
+
+            return redirect()->route('superadmin.login.show')->with('success', 'SuperAdmin account created successfully! Please login.');
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['email' => 'Failed to create SuperAdmin account. Please try again.'])->withInput();
+        }
+    }
 }

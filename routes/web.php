@@ -47,6 +47,13 @@ Route::get('/admin/register', [App\Http\Controllers\Auth\AuthController::class, 
 Route::post('/admin/register', [App\Http\Controllers\Auth\AuthController::class, 'adminRegister'])->name('admin.register');
 Route::post('/admin/logout', [App\Http\Controllers\Auth\AuthController::class, 'adminLogout'])->name('admin.logout');
 
+// SuperAdmin Authentication Routes
+Route::get('/superadmin/login', [App\Http\Controllers\Auth\AuthController::class, 'showSuperAdminLoginForm'])->name('superadmin.login.show');
+Route::post('/superadmin/login', [App\Http\Controllers\Auth\AuthController::class, 'superAdminLogin'])->name('superadmin.login');
+Route::get('/superadmin/register', [App\Http\Controllers\Auth\AuthController::class, 'showSuperAdminRegisterForm'])->name('superadmin.register.show');
+Route::post('/superadmin/register', [App\Http\Controllers\Auth\AuthController::class, 'superAdminRegister'])->name('superadmin.register');
+Route::post('/superadmin/logout', [App\Http\Controllers\Auth\AuthController::class, 'superAdminLogout'])->name('superadmin.logout');
+
 // Redirect old /profile to new /my-profile (outside auth middleware)
 Route::get('/profile', function () {
     if (Auth::check()) {

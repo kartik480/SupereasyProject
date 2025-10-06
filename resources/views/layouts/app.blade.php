@@ -1212,7 +1212,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="{{ route('superadmin.dashboard') }}">
+                                    <a class="dropdown-item" href="{{ route('superadmin.login.show') }}">
                                         <i class="fas fa-crown me-2"></i>Super Admin
                                     </a>
                                 </li>
@@ -1319,7 +1319,7 @@
 
     <!-- Admin Panel Buttons -->
     <div class="admin-panel-buttons">
-        <a href="{{ route('superadmin.dashboard') }}" class="admin-panel-btn superadmin-btn">
+        <a href="{{ route('superadmin.login.show') }}" class="admin-panel-btn superadmin-btn">
             <i class="fas fa-crown me-2"></i>Super Admin
         </a>
         <a href="{{ route('admin.login.show') }}" class="admin-panel-btn">
