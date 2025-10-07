@@ -31,9 +31,9 @@
             </div>
         </div>
         <div class="stat-card-value">{{ $totalMaids }}</div>
-        <div class="stat-card-label">Total Maids</div>
+        <div class="stat-card-label">Approved Maids</div>
         <div class="stat-card-change positive">
-            <i class="fas fa-arrow-up me-1"></i>+8% from last month
+            <i class="fas fa-arrow-up me-1"></i>SuperAdmin Verified
         </div>
     </div>
 
@@ -81,8 +81,12 @@
 <div class="content-card">
     <div class="card-header">
         <h5 class="card-title">
-            <i class="fas fa-list"></i>All Maids
+            <i class="fas fa-list"></i>Approved Maids
         </h5>
+        <div class="alert alert-info mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Only SuperAdmin-approved maids are shown here. Pending and rejected maids are managed by SuperAdmin.
+        </div>
     </div>
     <div class="card-body p-0">
         @if($maids->count() > 0)
@@ -93,9 +97,11 @@
                             <th>Photo</th>
                             <th>Maid Details</th>
                             <th>Contact</th>
+                            <th>Service Category</th>
                             <th>Specialization</th>
                             <th>Rating</th>
                             <th>Status</th>
+                            <th>Verification</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -115,6 +121,28 @@
                             <td>
                                 <div class="fw-bold">{{ $maid->phone ?? 'N/A' }}</div>
                                 <small class="text-muted">{{ $maid->email }}</small>
+                            </td>
+                            <td>
+                                @php
+                                    $serviceCategory = $maid->service_categories;
+                                    // Handle both old array format and new string format
+                                    if (is_string($serviceCategory)) {
+                                        $decoded = json_decode($serviceCategory, true);
+                                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                            $serviceCategory = $decoded;
+                                        }
+                                    }
+                                    
+                                    // If it's still an array, take the first one (for backward compatibility)
+                                    if (is_array($serviceCategory)) {
+                                        $serviceCategory = !empty($serviceCategory) ? $serviceCategory[0] : '';
+                                    }
+                                @endphp
+                                @if(!empty($serviceCategory))
+                                    <span class="badge bg-primary text-white">{{ $serviceCategory }}</span>
+                                @else
+                                    <span class="text-muted small">No category</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="badge bg-secondary">{{ $maid->specialization ?? 'General' }}</span>
@@ -138,8 +166,24 @@
                                     @else
                                         <span class="status-badge inactive">Inactive</span>
                                     @endif
-                                    @if($maid->is_verified)
-                                        <span class="status-badge active">Verified</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="status-badge success">
+                                        <i class="fas fa-check-circle me-1"></i>Approved
+                                    </span>
+                                    
+                                    @if($maid->verified_at)
+                                        <small class="text-muted">
+                                            Verified: {{ $maid->verified_at->format('M d, Y') }}
+                                        </small>
+                                    @endif
+                                    
+                                    @if($maid->verification_notes)
+                                        <small class="text-info" title="{{ $maid->verification_notes }}">
+                                            <i class="fas fa-sticky-note me-1"></i>Notes Available
+                                        </small>
                                     @endif
                                 </div>
                             </td>

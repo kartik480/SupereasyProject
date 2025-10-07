@@ -21,6 +21,11 @@ class MaidController extends Controller
             $busyMaids = Maid::where('is_available', false)->count();
             $verifiedMaids = Maid::where('is_verified', true)->count();
             $topRatedMaids = Maid::where('rating', '>=', 4.0)->count();
+            
+            // New verification stats
+            $pendingMaids = Maid::where('verification_status', 'pending')->count();
+            $approvedMaids = Maid::where('verification_status', 'approved')->count();
+            $rejectedMaids = Maid::where('verification_status', 'rejected')->count();
 
             $maids = Maid::withCount(['bookings' => function($query) {
                 $query->where('status', 'completed');
@@ -35,6 +40,9 @@ class MaidController extends Controller
                 'busy' => $busyMaids,
                 'verified' => $verifiedMaids,
                 'top_rated' => $topRatedMaids,
+                'pending' => $pendingMaids,
+                'approved' => $approvedMaids,
+                'rejected' => $rejectedMaids,
             ];
 
             return view('superadmin.maids.index', compact('maids', 'stats'));
@@ -49,6 +57,9 @@ class MaidController extends Controller
                     'busy' => 0,
                     'verified' => 0,
                     'top_rated' => 0,
+                    'pending' => 0,
+                    'approved' => 0,
+                    'rejected' => 0,
                 ]
             ]);
         }
@@ -56,7 +67,10 @@ class MaidController extends Controller
 
     public function create()
     {
-        return view('superadmin.maids.create');
+        // Get available service categories for dropdown
+        $categories = \App\Models\Category::where('is_active', true)->get();
+        
+        return view('superadmin.maids.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -65,18 +79,19 @@ class MaidController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:maids,email',
             'phone' => 'required|string|max:20',
-            'address' => 'required|string|max:500',
-            'age' => 'required|integer|min:18|max:65',
-            'experience_years' => 'required|integer|min:0|max:50',
-            'hourly_rate' => 'required|numeric|min:0',
-            'profile_image' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'address_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'background_check' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:male,female,other',
+            'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
-            'availability_schedule' => 'nullable|string',
-            'service_categories' => 'nullable|array',
+            'hourly_rate' => 'required|numeric|min:0',
+            'service_categories' => 'required|string|max:255',
+            'service_areas' => 'nullable|string',
+            'specialization' => 'nullable|string|max:255',
+            'experience_years' => 'nullable|integer|min:0|max:50',
+            'working_hours' => 'nullable|string',
+            'profile_image' => 'nullable|image|max:2048',
             'is_active' => 'boolean',
             'is_available' => 'boolean',
             'is_verified' => 'boolean',
@@ -115,10 +130,23 @@ class MaidController extends Controller
                 $data['background_check'] = $path;
             }
 
-            // Handle service categories
-            if ($request->has('service_categories')) {
-                $data['service_categories'] = json_encode($request->service_categories);
+            // Handle comma-separated strings to arrays for JSON fields
+            if ($request->skills) {
+                $data['skills'] = array_map('trim', explode(',', $request->skills));
             }
+            if ($request->languages) {
+                $data['languages'] = array_map('trim', explode(',', $request->languages));
+            }
+            if ($request->service_areas) {
+                $data['service_areas'] = array_map('trim', explode(',', $request->service_areas));
+            }
+            // Handle service_categories as single string
+            if ($request->service_categories) {
+                $data['service_categories'] = $request->service_categories;
+            }
+
+            // Set default verification status to pending
+            $data['verification_status'] = 'pending';
 
             $maid = Maid::create($data);
 
@@ -167,23 +195,27 @@ class MaidController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:maids,email,' . $maid->id,
+            'email' => 'required|string|email|max:255|unique:maids,email,' . $maid->id,
             'phone' => 'required|string|max:20',
-            'address' => 'required|string|max:500',
-            'age' => 'required|integer|min:18|max:65',
-            'experience_years' => 'required|integer|min:0|max:50',
-            'hourly_rate' => 'required|numeric|min:0',
-            'profile_image' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'address_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'background_check' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:male,female,other',
+            'marital_status' => 'nullable|in:single,married,divorced,widowed',
+            'husband_name' => 'nullable|string|max:255',
+            'father_name' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
-            'availability_schedule' => 'nullable|string',
-            'service_categories' => 'nullable|array',
+            'hourly_rate' => 'required|numeric|min:0',
+            'service_categories' => 'required|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'experience_years' => 'nullable|integer|min:0',
+            'working_hours' => 'nullable|string',
+            'service_areas' => 'nullable|string',
+            'profile_image' => 'nullable|image|max:2048',
+            'is_verified' => 'boolean',
             'is_active' => 'boolean',
             'is_available' => 'boolean',
-            'is_verified' => 'boolean',
         ]);
 
         DB::beginTransaction();
@@ -240,15 +272,29 @@ class MaidController extends Controller
             }
 
             // Handle service categories
-            if ($request->has('service_categories')) {
-                $data['service_categories'] = json_encode($request->service_categories);
+            if ($request->has('service_categories') && !empty($request->service_categories)) {
+                $data['service_categories'] = $request->service_categories;
+            } else {
+                $data['service_categories'] = [];
+            }
+
+            // Convert comma-separated strings to arrays for JSON fields
+            if ($request->skills) {
+                $data['skills'] = array_map('trim', explode(',', $request->skills));
+            }
+            if ($request->languages) {
+                $data['languages'] = array_map('trim', explode(',', $request->languages));
+            }
+            // Handle service_categories as single string
+            if ($request->service_categories) {
+                $data['service_categories'] = $request->service_categories;
             }
 
             $maid->update($data);
 
             DB::commit();
             return redirect()->route('superadmin.maids.index')
-                ->with('success', 'Maid updated successfully!');
+                ->with('success', 'Maid updated successfully! Changes are synchronized across all panels.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error updating maid: " . $e->getMessage(), [
@@ -341,6 +387,76 @@ class MaidController extends Controller
                 'error' => $e->getTraceAsString()
             ]);
             return back()->withErrors(['error' => 'Failed to assign booking to maid.']);
+        }
+    }
+
+    public function approveMaid(Request $request, Maid $maid)
+    {
+        $request->validate([
+            'verification_notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $maid->update([
+                'verification_status' => 'approved',
+                'verified_at' => now(),
+                'verification_notes' => $request->verification_notes,
+                'is_verified' => true,
+                'is_active' => true,
+            ]);
+
+            return back()->with('success', 'Maid approved successfully!');
+        } catch (\Exception $e) {
+            Log::error("Error approving maid: " . $e->getMessage(), [
+                'maid_id' => $maid->id,
+                'error' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to approve maid.']);
+        }
+    }
+
+    public function rejectMaid(Request $request, Maid $maid)
+    {
+        $request->validate([
+            'verification_notes' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $maid->update([
+                'verification_status' => 'rejected',
+                'verified_at' => now(),
+                'verification_notes' => $request->verification_notes,
+                'is_verified' => false,
+                'is_active' => false,
+            ]);
+
+            return back()->with('success', 'Maid rejected successfully!');
+        } catch (\Exception $e) {
+            Log::error("Error rejecting maid: " . $e->getMessage(), [
+                'maid_id' => $maid->id,
+                'error' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to reject maid.']);
+        }
+    }
+
+    public function resetVerification(Maid $maid)
+    {
+        try {
+            $maid->update([
+                'verification_status' => 'pending',
+                'verified_at' => null,
+                'verification_notes' => null,
+                'is_verified' => false,
+            ]);
+
+            return back()->with('success', 'Maid verification reset successfully!');
+        } catch (\Exception $e) {
+            Log::error("Error resetting maid verification: " . $e->getMessage(), [
+                'maid_id' => $maid->id,
+                'error' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to reset maid verification.']);
         }
     }
 }

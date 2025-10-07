@@ -49,6 +49,9 @@ class Maid extends Model
         'completed_bookings',
         'is_available',
         'service_categories',
+        'verification_status',
+        'verified_at',
+        'verification_notes',
     ];
 
     protected $casts = [
@@ -63,6 +66,8 @@ class Maid extends Model
         'languages' => 'array',
         'working_hours' => 'array',
         'service_areas' => 'array',
+        'service_categories' => 'array',
+        'verified_at' => 'datetime',
     ];
 
     public function bookings()
@@ -93,6 +98,21 @@ class Maid extends Model
     public function scopeVerified($query)
     {
         return $query->where('is_verified', true);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('verification_status', 'approved');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('verification_status', 'pending');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('verification_status', 'rejected');
     }
 
     public function getProfileImageUrlAttribute()

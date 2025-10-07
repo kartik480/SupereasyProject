@@ -82,6 +82,7 @@
                         <option value="washing" class="one-time-option" {{ old('subcategory') == 'washing' ? 'selected' : '' }}>Washing</option>
                         <option value="washroom" class="one-time-option" {{ old('subcategory') == 'washroom' ? 'selected' : '' }}>Washroom Cleaning</option>
                         <option value="cooking" class="one-time-option" {{ old('subcategory') == 'cooking' ? 'selected' : '' }}>Cooking</option>
+                        <option value="cleaning" class="one-time-option" {{ old('subcategory') == 'cleaning' ? 'selected' : '' }}>Cleaning</option>
                         <!-- Monthly Subscription Subcategories -->
                         <option value="home_maid" class="subscription-option" {{ old('subcategory') == 'home_maid' ? 'selected' : '' }}>Home Maid</option>
                         <option value="caretakers" class="subscription-option" {{ old('subcategory') == 'caretakers' ? 'selected' : '' }}>Caretakers</option>

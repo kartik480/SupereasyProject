@@ -86,6 +86,7 @@
                         <option value="washing" class="one-time-option" {{ old('subcategory', $service->subcategory) == 'washing' ? 'selected' : '' }}>Washing</option>
                         <option value="washroom" class="one-time-option" {{ old('subcategory', $service->subcategory) == 'washroom' ? 'selected' : '' }}>Washroom Cleaning</option>
                         <option value="cooking" class="one-time-option" {{ old('subcategory', $service->subcategory) == 'cooking' ? 'selected' : '' }}>Cooking</option>
+                        <option value="cleaning" class="one-time-option" {{ old('subcategory', $service->subcategory) == 'cleaning' ? 'selected' : '' }}>Cleaning</option>
                         <!-- Monthly Subscription Subcategories -->
                         <option value="home_maid" class="subscription-option" {{ old('subcategory', $service->subcategory) == 'home_maid' ? 'selected' : '' }}>Home Maid</option>
                         <option value="caretakers" class="subscription-option" {{ old('subcategory', $service->subcategory) == 'caretakers' ? 'selected' : '' }}>Caretakers</option>
@@ -195,7 +196,7 @@
             <div class="mb-3">
                 <label for="requirements" class="form-label">Requirements</label>
                 <textarea class="form-control @error('requirements') is-invalid @enderror" 
-                          id="requirements" name="requirements" rows="2" placeholder="Enter requirements separated by commas">{{ old('requirements', $service->requirements) }}</textarea>
+                          id="requirements" name="requirements" rows="2" placeholder="Enter requirements separated by commas">{{ old('requirements', is_array($service->requirements) ? implode(', ', $service->requirements) : $service->requirements) }}</textarea>
                 <small class="form-text text-muted">Separate multiple requirements with commas (e.g., Access to water, Basic cleaning supplies provided)</small>
                 @error('requirements')
                     <div class="invalid-feedback">{{ $message }}</div>

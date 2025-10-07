@@ -155,7 +155,23 @@
                                             <option value="">Select Maid</option>
                                             @foreach($availableMaids as $maid)
                                                 <option value="{{ $maid->id }}">
-                                                    {{ $maid->name }} - Rating: {{ $maid->rating }}/5 - Experience: {{ $maid->experience_years ?? 0 }} years
+                                                    {{ $maid->name }} - Rating: {{ $maid->rating }}/5 
+                                                    @if($maid->service_categories)
+                                                        @php
+                                                            $maidCategory = $maid->service_categories;
+                                                            // Handle both old array format and new string format
+                                                            if (is_string($maidCategory)) {
+                                                                $decoded = json_decode($maidCategory, true);
+                                                                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                                                    $maidCategory = !empty($decoded) ? $decoded[0] : '';
+                                                                }
+                                                            }
+                                                            if (is_array($maidCategory)) {
+                                                                $maidCategory = !empty($maidCategory) ? $maidCategory[0] : '';
+                                                            }
+                                                        @endphp
+                                                        - Category: {{ $maidCategory }}
+                                                    @endif
                                                 </option>
                                             @endforeach
                                         </select>
@@ -169,7 +185,8 @@
                             <div class="text-center">
                                 <i class="fas fa-user-times fa-3x text-warning mb-3"></i>
                                 <h6 class="fw-bold">No Available Maids</h6>
-                                <p class="text-muted mb-0">No maids are available for this service category at the moment.</p>
+                                <p class="text-muted mb-0">No maids are available for the "{{ $booking->service->category ?? 'Unknown' }}" service category at the moment.</p>
+                                <small class="text-muted">Only approved maids matching this service category are shown.</small>
                             </div>
                         @endif
                     </div>

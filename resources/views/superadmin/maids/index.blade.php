@@ -39,12 +39,25 @@
 
     <div class="stat-card">
         <div class="stat-card-header">
+            <div class="stat-card-icon warning">
+                <i class="fas fa-clock"></i>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ $stats['pending'] }}</div>
+        <div class="stat-card-label">Pending Verification</div>
+        <div class="stat-card-change positive">
+            <i class="fas fa-arrow-up me-1"></i>Needs Review
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card-header">
             <div class="stat-card-icon success">
                 <i class="fas fa-check-circle"></i>
             </div>
         </div>
-        <div class="stat-card-value">{{ $stats['active'] }}</div>
-        <div class="stat-card-label">Active Maids</div>
+        <div class="stat-card-value">{{ $stats['approved'] }}</div>
+        <div class="stat-card-label">Approved</div>
         <div class="stat-card-change positive">
             <i class="fas fa-arrow-up me-1"></i>+12% from last month
         </div>
@@ -52,27 +65,14 @@
 
     <div class="stat-card">
         <div class="stat-card-header">
-            <div class="stat-card-icon warning">
-                <i class="fas fa-clock"></i>
+            <div class="stat-card-icon danger">
+                <i class="fas fa-times-circle"></i>
             </div>
         </div>
-        <div class="stat-card-value">{{ $stats['available'] }}</div>
-        <div class="stat-card-label">Available Now</div>
-        <div class="stat-card-change positive">
-            <i class="fas fa-arrow-up me-1"></i>+5% from last month
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card-header">
-            <div class="stat-card-icon info">
-                <i class="fas fa-star"></i>
-            </div>
-        </div>
-        <div class="stat-card-value">{{ $stats['top_rated'] }}</div>
-        <div class="stat-card-label">Top Rated</div>
-        <div class="stat-card-change positive">
-            <i class="fas fa-arrow-up me-1"></i>+2 from last month
+        <div class="stat-card-value">{{ $stats['rejected'] }}</div>
+        <div class="stat-card-label">Rejected</div>
+        <div class="stat-card-change negative">
+            <i class="fas fa-arrow-down me-1"></i>Requires Action
         </div>
     </div>
 </div>
@@ -93,9 +93,11 @@
                             <th>Photo</th>
                             <th>Maid Details</th>
                             <th>Contact</th>
+                            <th>Service Category</th>
                             <th>Specialization</th>
                             <th>Rating</th>
                             <th>Status</th>
+                            <th>Verification</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -115,6 +117,28 @@
                             <td>
                                 <div class="fw-bold">{{ $maid->phone ?? 'N/A' }}</div>
                                 <small class="text-muted">{{ $maid->email }}</small>
+                            </td>
+                            <td>
+                                @php
+                                    $serviceCategory = $maid->service_categories;
+                                    // Handle both old array format and new string format
+                                    if (is_string($serviceCategory)) {
+                                        $decoded = json_decode($serviceCategory, true);
+                                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                            $serviceCategory = $decoded;
+                                        }
+                                    }
+                                    
+                                    // If it's still an array, take the first one (for backward compatibility)
+                                    if (is_array($serviceCategory)) {
+                                        $serviceCategory = !empty($serviceCategory) ? $serviceCategory[0] : '';
+                                    }
+                                @endphp
+                                @if(!empty($serviceCategory))
+                                    <span class="badge bg-danger text-white">{{ $serviceCategory }}</span>
+                                @else
+                                    <span class="text-muted small">No category</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="badge bg-secondary">{{ $maid->specialization ?? 'General' }}</span>
@@ -138,8 +162,24 @@
                                     @else
                                         <span class="status-badge inactive">Inactive</span>
                                     @endif
-                                    @if($maid->is_verified)
-                                        <span class="status-badge active">Verified</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column gap-1">
+                                    @if($maid->verification_status == 'pending')
+                                        <span class="status-badge warning">Pending</span>
+                                    @elseif($maid->verification_status == 'approved')
+                                        <span class="status-badge success">Approved</span>
+                                    @elseif($maid->verification_status == 'rejected')
+                                        <span class="status-badge danger">Rejected</span>
+                                    @else
+                                        <span class="status-badge secondary">Unknown</span>
+                                    @endif
+                                    
+                                    @if($maid->verified_at)
+                                        <small class="text-muted">
+                                            Verified: {{ $maid->verified_at->format('M d, Y') }}
+                                        </small>
                                     @endif
                                 </div>
                             </td>
@@ -153,6 +193,53 @@
                                        class="btn-action btn-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    
+                                    @if($maid->verification_status == 'pending')
+                                        <!-- Approve Button -->
+                                        <button type="button" class="btn-action btn-success" 
+                                                title="Approve" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#approveModal{{ $maid->id }}">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        
+                                        <!-- Reject Button -->
+                                        <button type="button" class="btn-action btn-danger" 
+                                                title="Reject" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#rejectModal{{ $maid->id }}">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    @elseif($maid->verification_status == 'approved')
+                                        <!-- Reset Verification Button -->
+                                        <form action="{{ route('superadmin.maids.reset-verification', $maid) }}" 
+                                              method="POST" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to reset verification for this maid?')">
+                                            @csrf
+                                            <button type="submit" class="btn-action btn-warning" title="Reset Verification">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </form>
+                                    @elseif($maid->verification_status == 'rejected')
+                                        <!-- Approve Button -->
+                                        <button type="button" class="btn-action btn-success" 
+                                                title="Approve" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#approveModal{{ $maid->id }}">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                        
+                                        <!-- Reset Verification Button -->
+                                        <form action="{{ route('superadmin.maids.reset-verification', $maid) }}" 
+                                              method="POST" class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to reset verification for this maid?')">
+                                            @csrf
+                                            <button type="submit" class="btn-action btn-warning" title="Reset Verification">
+                                                <i class="fas fa-undo"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    
                                     <form action="{{ route('superadmin.maids.destroy', $maid) }}" 
                                           method="POST" class="d-inline"
                                           onsubmit="return confirm('Are you sure you want to delete this maid?')">
@@ -188,4 +275,73 @@
         @endif
     </div>
 </div>
+
+<!-- Modals for Verification Actions -->
+@foreach($maids as $maid)
+<!-- Approve Modal -->
+<div class="modal fade" id="approveModal{{ $maid->id }}" tabindex="-1" aria-labelledby="approveModalLabel{{ $maid->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approveModalLabel{{ $maid->id }}">
+                    <i class="fas fa-check-circle text-success me-2"></i>Approve Maid
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('superadmin.maids.approve', $maid) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        You are about to approve <strong>{{ $maid->name }}</strong> for the platform.
+                    </div>
+                    <div class="mb-3">
+                        <label for="verification_notes{{ $maid->id }}" class="form-label">Verification Notes (Optional)</label>
+                        <textarea class="form-control" id="verification_notes{{ $maid->id }}" name="verification_notes" rows="3" placeholder="Add any notes about the approval..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Approve Maid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal{{ $maid->id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ $maid->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectModalLabel{{ $maid->id }}">
+                    <i class="fas fa-times-circle text-danger me-2"></i>Reject Maid
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('superadmin.maids.reject', $maid) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        You are about to reject <strong>{{ $maid->name }}</strong> from the platform.
+                    </div>
+                    <div class="mb-3">
+                        <label for="reject_notes{{ $maid->id }}" class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reject_notes{{ $maid->id }}" name="verification_notes" rows="3" placeholder="Please provide a reason for rejection..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times me-2"></i>Reject Maid
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
 @endsection

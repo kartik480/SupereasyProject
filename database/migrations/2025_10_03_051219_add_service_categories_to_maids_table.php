@@ -14,7 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('maids', function (Blueprint $table) {
-            $table->string('service_categories')->nullable()->after('service_areas');
+            $table->json('service_categories')->nullable()->after('service_areas');
             $table->string('specialization')->nullable()->after('service_categories');
             $table->integer('experience_years')->default(0)->after('specialization');
             $table->integer('completed_bookings')->default(0)->after('experience_years');

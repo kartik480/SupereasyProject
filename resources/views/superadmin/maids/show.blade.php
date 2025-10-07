@@ -73,6 +73,28 @@
                             <label class="form-label fw-bold">Specialization:</label>
                             <p class="mb-0">{{ $maid->specialization ?? 'General' }}</p>
                         </div>
+                        
+                        <div class="info-item mb-3">
+                            <label class="form-label fw-bold">Service Categories:</label>
+                            <div class="mb-0">
+                                @if($maid->service_categories && !empty($maid->service_categories))
+                                    @php
+                                        $serviceCategories = is_array($maid->service_categories) ? $maid->service_categories : json_decode($maid->service_categories, true);
+                                    @endphp
+                                    @if(is_array($serviceCategories) && !empty($serviceCategories))
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach($serviceCategories as $category)
+                                                <span class="badge bg-danger text-white">{{ $category }}</span>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Not specified</span>
+                                    @endif
+                                @else
+                                    <span class="text-muted">Not specified</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
                 

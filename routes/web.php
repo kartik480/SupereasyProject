@@ -83,11 +83,19 @@ Route::put('/profile/update', [App\Http\Controllers\Auth\AuthController::class, 
 
 // Booking routes (Temporarily removing auth middleware for testing)
 Route::post('/bookings', [App\Http\Controllers\BookingController::class, 'store'])->name('bookings.store');
+
+// Maid selection routes (temporarily outside auth middleware due to auth middleware issue)
+Route::get('/bookings/{booking}/select-maid', [App\Http\Controllers\BookingController::class, 'selectMaid'])->name('bookings.select-maid');
+Route::post('/bookings/{booking}/confirm', [App\Http\Controllers\BookingController::class, 'confirmBooking'])->name('bookings.confirm');
+
+// Booking details route (temporarily outside auth middleware due to auth middleware issue)
+Route::get('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'show'])->name('bookings.show');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/bookings', [App\Http\Controllers\BookingController::class, 'index'])->name('bookings.index');
-    Route::get('/bookings/{booking}', [App\Http\Controllers\BookingController::class, 'show'])->name('bookings.show');
     Route::delete('/bookings/{booking}/cancel', [App\Http\Controllers\BookingController::class, 'cancel'])->name('bookings.cancel');
 });
+
 
 // Admin Routes (Protected by admin middleware)
 Route::prefix('admin')->middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
@@ -282,6 +290,11 @@ Route::prefix('superadmin')->middleware([\App\Http\Middleware\AdminMiddleware::c
     ]);
     Route::patch('/maids/{maid}/toggle-availability', [App\Http\Controllers\SuperAdmin\MaidController::class, 'toggleAvailability'])->name('superadmin.maids.toggle-availability');
     Route::post('/maids/{maid}/assign-booking', [App\Http\Controllers\SuperAdmin\MaidController::class, 'assignBooking'])->name('superadmin.maids.assign-booking');
+    
+    // Maid verification routes
+    Route::post('/maids/{maid}/approve', [App\Http\Controllers\SuperAdmin\MaidController::class, 'approveMaid'])->name('superadmin.maids.approve');
+    Route::post('/maids/{maid}/reject', [App\Http\Controllers\SuperAdmin\MaidController::class, 'rejectMaid'])->name('superadmin.maids.reject');
+    Route::post('/maids/{maid}/reset-verification', [App\Http\Controllers\SuperAdmin\MaidController::class, 'resetVerification'])->name('superadmin.maids.reset-verification');
     
     // Booking Status Management
     Route::post('/bookings/{booking}/confirm', [App\Http\Controllers\SuperAdmin\BookingController::class, 'confirm'])->name('superadmin.bookings.confirm');

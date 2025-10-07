@@ -15,18 +15,20 @@ class MaidController extends Controller
     public function index()
     {
         try {
-            $totalMaids = Maid::count();
-            $activeMaids = Maid::where('is_active', true)->count();
-            $availableMaids = Maid::where('is_available', true)->count();
-            $busyMaids = Maid::where('is_available', false)->count();
-            $verifiedMaids = Maid::where('is_verified', true)->count();
-            $topRatedMaids = Maid::where('rating', '>=', 4.0)->count();
+            // Only show approved maids for admin (pending/rejected maids are hidden until superadmin approval)
+            $totalMaids = Maid::where('verification_status', 'approved')->count();
+            $activeMaids = Maid::where('verification_status', 'approved')->where('is_active', true)->count();
+            $availableMaids = Maid::where('verification_status', 'approved')->where('is_available', true)->count();
+            $busyMaids = Maid::where('verification_status', 'approved')->where('is_available', false)->count();
+            $verifiedMaids = Maid::where('verification_status', 'approved')->where('is_verified', true)->count();
+            $topRatedMaids = Maid::where('verification_status', 'approved')->where('rating', '>=', 4.0)->count();
 
-            $maids = Maid::withCount(['bookings' => function($query) {
-                $query->where('status', 'completed');
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            $maids = Maid::where('verification_status', 'approved')
+                ->withCount(['bookings' => function($query) {
+                    $query->where('status', 'completed');
+                }])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
             return view('admin.maids.index', compact(
                 'maids',
@@ -64,16 +66,19 @@ class MaidController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:maids,email',
+            'email' => 'required|string|email|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'nullable|string|max:500',
             'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female,other',
+            'marital_status' => 'nullable|in:single,married,divorced,widowed',
+            'husband_name' => 'nullable|string|max:255',
+            'father_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
             'hourly_rate' => 'required|numeric|min:0',
-            'service_categories' => 'nullable|string',
+            'service_categories' => 'required|string|max:255',
             'specialization' => 'nullable|string|max:255',
             'experience_years' => 'nullable|integer|min:0',
             'working_hours' => 'nullable|string',
@@ -109,6 +114,10 @@ class MaidController extends Controller
             }
             if ($request->service_areas) {
                 $data['service_areas'] = array_map('trim', explode(',', $request->service_areas));
+            }
+            // Handle service_categories as single string
+            if ($request->service_categories) {
+                $data['service_categories'] = $request->service_categories;
             }
 
             $maid = Maid::create($data);
@@ -163,11 +172,14 @@ class MaidController extends Controller
             'address' => 'nullable|string|max:500',
             'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female,other',
+            'marital_status' => 'nullable|in:single,married,divorced,widowed',
+            'husband_name' => 'nullable|string|max:255',
+            'father_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:1000',
             'skills' => 'nullable|string',
             'languages' => 'nullable|string',
             'hourly_rate' => 'required|numeric|min:0',
-            'service_categories' => 'nullable|string',
+            'service_categories' => 'required|string|max:255',
             'specialization' => 'nullable|string|max:255',
             'experience_years' => 'nullable|integer|min:0',
             'working_hours' => 'nullable|string',
@@ -209,12 +221,16 @@ class MaidController extends Controller
             if ($request->service_areas) {
                 $data['service_areas'] = array_map('trim', explode(',', $request->service_areas));
             }
+            // Handle service_categories as single string
+            if ($request->service_categories) {
+                $data['service_categories'] = $request->service_categories;
+            }
 
             $maid->update($data);
 
             DB::commit();
             return redirect()->route('admin.maids.show', $maid)
-                ->with('success', 'Maid updated successfully!');
+                ->with('success', 'Maid updated successfully! Changes are synchronized across all panels.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error updating maid: " . $e->getMessage(), [

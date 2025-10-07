@@ -74,13 +74,52 @@ class BookingController extends Controller
     public function show(Booking $booking)
     {
         try {
-            $booking->load(['user:id,name,email,phone,address', 'service:id,name,category,price', 'maid:id,name,phone,rating']);
+            $booking->load(['user:id,name,email,phone,address', 'service:id,name,category,subcategory,price', 'maid:id,name,phone,rating']);
             
-            // Get available maids safely
-            $availableMaids = Maid::select(['id', 'name', 'rating', 'is_available'])
-                ->where('is_active', true)
-                ->where('is_available', true)
-                ->get();
+            // Get available maids that match the service category
+            $availableMaids = collect();
+            
+            if ($booking->service) {
+                $serviceCategory = $booking->service->category;
+                $serviceSubcategory = $booking->service->subcategory;
+                
+                // Get all approved, active, available maids first
+                $allMaids = Maid::select(['id', 'name', 'rating', 'is_available', 'service_categories', 'verification_status'])
+                    ->where('is_active', true)
+                    ->where('is_available', true)
+                    ->where('verification_status', 'approved')
+                    ->get();
+                
+                // Filter maids by service category match - STRICT FILTERING
+                $availableMaids = $allMaids->filter(function ($maid) use ($serviceCategory, $serviceSubcategory) {
+                    // Get maid's service category
+                    $maidCategory = $maid->service_categories;
+                    
+                    // Handle different data formats (backward compatibility)
+                    if (is_string($maidCategory)) {
+                        // Try to decode JSON first (for old array data)
+                        $decoded = json_decode($maidCategory, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            // If it's an array, take the first category
+                            $maidCategory = !empty($decoded) ? $decoded[0] : '';
+                        }
+                        // If not JSON, treat as single string (new format)
+                    }
+                    
+                    // If it's still an array (fallback), take the first one
+                    if (is_array($maidCategory)) {
+                        $maidCategory = !empty($maidCategory) ? $maidCategory[0] : '';
+                    }
+                    
+                    // Convert to lowercase for comparison
+                    $maidCategory = strtolower(trim($maidCategory));
+                    $serviceCat = strtolower(trim($serviceCategory));
+                    $serviceSub = strtolower(trim($serviceSubcategory));
+                    
+                    // STRICT MATCHING - only show maids that have the exact service category
+                    return $maidCategory === $serviceCat || $maidCategory === $serviceSub;
+                });
+            }
 
             return view('admin.bookings.show', compact('booking', 'availableMaids'));
             
@@ -171,8 +210,18 @@ class BookingController extends Controller
         try {
             $maid = Maid::find($request->maid_id);
 
+            // Check if maid is available
             if (!$maid->is_available) {
-                return back()->withErrors(['maid' => 'Selected maid is not available.']);
+                return back()->withErrors(['maid' => 'Selected maid is not available. Please select another maid.']);
+            }
+
+            // Check if maid is active and approved
+            if (!$maid->is_active) {
+                return back()->withErrors(['maid' => 'Selected maid is not active.']);
+            }
+
+            if ($maid->verification_status !== 'approved') {
+                return back()->withErrors(['maid' => 'Selected maid is not approved.']);
             }
 
             // Free up old maid if exists
@@ -180,6 +229,11 @@ class BookingController extends Controller
                 $oldMaid = Maid::find($booking->maid_id);
                 if ($oldMaid) {
                     $oldMaid->update(['is_available' => true]);
+                    \Log::info("Freed up old maid", [
+                        'old_maid_id' => $oldMaid->id,
+                        'old_maid_name' => $oldMaid->name,
+                        'booking_id' => $booking->id
+                    ]);
                 }
             }
 
@@ -193,11 +247,22 @@ class BookingController extends Controller
             // Mark maid as unavailable
             $maid->update(['is_available' => false]);
 
-            return back()->with('success', 'Maid assigned successfully!');
+            \Log::info("Maid assigned successfully", [
+                'maid_id' => $maid->id,
+                'maid_name' => $maid->name,
+                'booking_id' => $booking->id,
+                'booking_reference' => $booking->booking_reference
+            ]);
+
+            return back()->with('success', 'Maid assigned successfully! The maid is now unavailable for other bookings.');
             
         } catch (\Exception $e) {
-            \Log::error("Assign maid error: " . $e->getMessage());
-            return back()->withErrors(['error' => 'Failed to assign maid.']);
+            \Log::error("Assign maid error: " . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'maid_id' => $request->maid_id,
+                'error' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Failed to assign maid. Please try again.']);
         }
     }
 
@@ -209,16 +274,25 @@ class BookingController extends Controller
                 $maid = Maid::find($booking->maid_id);
                 if ($maid) {
                     $maid->update(['is_available' => true]);
+                    \Log::info("Freed up maid due to booking deletion", [
+                        'maid_id' => $maid->id,
+                        'maid_name' => $maid->name,
+                        'booking_id' => $booking->id,
+                        'booking_reference' => $booking->booking_reference
+                    ]);
                 }
             }
 
             $booking->delete();
 
             return redirect()->route('admin.bookings.index')
-                ->with('success', 'Booking deleted successfully!');
+                ->with('success', 'Booking deleted successfully! Maid has been freed up for other bookings.');
                 
         } catch (\Exception $e) {
-            \Log::error("Delete booking error: " . $e->getMessage());
+            \Log::error("Delete booking error: " . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'error' => $e->getTraceAsString()
+            ]);
             return back()->withErrors(['error' => 'Failed to delete booking.']);
         }
     }
@@ -258,11 +332,21 @@ class BookingController extends Controller
                 $maid = Maid::find($booking->maid_id);
                 if ($maid) {
                     $maid->update(['is_available' => true]);
+                    \Log::info("Freed up maid due to booking cancellation", [
+                        'maid_id' => $maid->id,
+                        'maid_name' => $maid->name,
+                        'booking_id' => $booking->id,
+                        'booking_reference' => $booking->booking_reference
+                    ]);
                 }
             }
 
-            return back()->with('success', 'Booking cancelled successfully!');
+            return back()->with('success', 'Booking cancelled successfully! Maid has been freed up for other bookings.');
         } catch (\Exception $e) {
+            \Log::error("Cancel booking error: " . $e->getMessage(), [
+                'booking_id' => $booking->id,
+                'error' => $e->getTraceAsString()
+            ]);
             return back()->withErrors(['error' => 'Failed to cancel booking.']);
         }
     }

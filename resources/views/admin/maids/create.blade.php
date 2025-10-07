@@ -147,11 +147,25 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label for="service_categories" class="form-label">Service Categories</label>
-                            <input type="text" class="form-control @error('service_categories') is-invalid @enderror" 
-                                   id="service_categories" name="service_categories" value="{{ old('service_categories') }}" 
-                                   placeholder="e.g., Housekeeping, Cooking, Childcare">
-                            <div class="form-text">Separate multiple categories with commas</div>
+                            <label for="service_categories" class="form-label">Service Category <span class="text-danger">*</span></label>
+                            <select class="form-select @error('service_categories') is-invalid @enderror" 
+                                    id="service_categories" 
+                                    name="service_categories" 
+                                    required>
+                                <option value="">Select Service Category</option>
+                                <option value="electrical" {{ old('service_categories') == 'electrical' ? 'selected' : '' }}>Electrical</option>
+                                <option value="plumbing" {{ old('service_categories') == 'plumbing' ? 'selected' : '' }}>Plumbing</option>
+                                <option value="washing" {{ old('service_categories') == 'washing' ? 'selected' : '' }}>Washing</option>
+                                <option value="washroom" {{ old('service_categories') == 'washroom' ? 'selected' : '' }}>Washroom Cleaning</option>
+                                <option value="cooking" {{ old('service_categories') == 'cooking' ? 'selected' : '' }}>Cooking</option>
+                                <option value="cleaning" {{ old('service_categories') == 'cleaning' ? 'selected' : '' }}>Cleaning</option>
+                                <option value="home_maid" {{ old('service_categories') == 'home_maid' ? 'selected' : '' }}>Home Maid</option>
+                                <option value="caretakers" {{ old('service_categories') == 'caretakers' ? 'selected' : '' }}>Caretakers</option>
+                                <option value="cooking_subscription" {{ old('service_categories') == 'cooking_subscription' ? 'selected' : '' }}>Cooking (Subscription)</option>
+                                <option value="car_cleaning" {{ old('service_categories') == 'car_cleaning' ? 'selected' : '' }}>Car Cleaning</option>
+                                <option value="washroom_cleaning" {{ old('service_categories') == 'washroom_cleaning' ? 'selected' : '' }}>Washroom Cleaning (Subscription)</option>
+                            </select>
+                            <div class="form-text">Select the primary service category for this maid</div>
                             @error('service_categories')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -278,4 +292,35 @@
         </form>
     </div>
 </div>
+
+<style>
+/* Basic styling for the single select dropdown */
+#service_categories {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 8px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+#service_categories:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+/* Style for hover effect */
+#service_categories option:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+</style>
+
+<script>
+// No special JavaScript needed for single select dropdown
+</script>
 @endsection

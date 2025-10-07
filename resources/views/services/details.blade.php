@@ -499,12 +499,20 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 console.log('Response data:', data);
                 if (data.success) {
-                    // Show success modal
-                    document.getElementById('bookingReference').textContent = data.booking_reference || 'N/A';
-                    bookingSuccessModal.show();
+                    // Show success popup message
+                    showSuccessMessage(data.message || 'Booking successful! We will contact you soon to confirm the details.');
                     
                     // Reset form
                     bookingForm.reset();
+                    
+                    // Redirect to home page after a short delay
+                    setTimeout(() => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            window.location.href = '{{ route("home") }}';
+                        }
+                    }, 2000);
                 } else {
                     // Show error messages
                     console.log('Booking failed with errors:', data.errors);
@@ -609,6 +617,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 input.parentNode.appendChild(errorDiv);
             }
         });
+    }
+    
+    function showSuccessMessage(message) {
+        // Create success alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Add to body
+        document.body.appendChild(alertDiv);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
     }
 });
 </script>
